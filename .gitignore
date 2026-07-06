@@ -1,0 +1,9 @@
+/src-tauri/target/
+/node_modules/
+
+# These are large binaries you provide locally per README-BUILD.md —
+# don't want them accidentally committed/shared by mistake.
+/src-tauri/resources/jre/**
+!/src-tauri/resources/jre/PUT_JRE_HERE.txt
+/src-tauri/resources/backend/**
+!/src-tauri/resources/backend/PUT_JAR_HERE.txt

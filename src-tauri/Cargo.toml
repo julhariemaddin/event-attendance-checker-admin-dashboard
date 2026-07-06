@@ -1,0 +1,31 @@
+[package]
+name = "aseado"
+version = "1.0.0"
+description = "ASEADO Event Attendance Admin"
+authors = ["you"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { version = "1", features = [] }
+
+[dependencies]
+# NOTE: "devtools" is enabled so right-click -> Inspect Element reliably works
+# even on `tauri build --debug` bundles (Tauri's docs say debug builds get
+# this automatically, but in practice — especially once run through the NSIS
+# bundler rather than `cargo run` — it often doesn't without this feature).
+# It also enables the inspector in --release builds, which is convenient
+# while debugging. Consider removing it before shipping a final release
+# build to customers if you don't want them able to open devtools.
+tauri = { version = "1", features = [ "dialog-open", "process-relaunch", "window-unmaximize", "window-minimize", "window-set-fullscreen", "window-hide", "window-close", "window-set-focus", "window-show", "window-start-dragging", "window-maximize", "shell-open", "devtools"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+# Used to wait for the backend's port to open before showing the window,
+# instead of guessing with a fixed sleep.
+reqwest = { version = "0.12", default-features = false, features = ["blocking"] }
+
+[features]
+# this feature is used for production builds or when `devPath` points to the filesystem
+# DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]
