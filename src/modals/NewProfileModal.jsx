@@ -34,7 +34,7 @@ export function NewProfileModal({ show, onClose, departmentTemplates, onCreate, 
     )}>
       <div className="field">
         <label>Profile name</label>
-        <input type="text" placeholder="e.g. Foundation Week 2026" value={name} onChange={(e) => setName(e.target.value)} />
+        <input type="text" placeholder="e.g. 1st Sem 2026" value={name} onChange={(e) => setName(e.target.value)} />
       </div>
       <div className="field">
         <label>Mode</label>
