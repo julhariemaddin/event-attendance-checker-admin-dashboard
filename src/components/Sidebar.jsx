@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 const NAV_ITEMS = [
   { view: 'monitor',     label: 'Live Monitor',  requiresProfile: true  },
   { view: 'events',      label: 'Events',         requiresProfile: true  },
+  { view: 'history',     label: 'History',        requiresProfile: true  },
   { view: 'roster',      label: 'Roster',         requiresProfile: true  },
   { view: 'import',      label: 'Import',         requiresProfile: true  },
   { view: 'departments', label: 'Departments',    requiresProfile: false },

@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Modal } from '../components/Modal.jsx';
+import { api } from '../api/client.js';
 
 // Ported from #modalManualEntry + openManualEntry()/meCreateBtn handler in admin.js.
+// EDIT: Year and Program are now real dropdowns sourced from
+// /api/events/meta/years and /api/events/meta/programs (already existing
+// endpoints), instead of free-text fields, per improvement #1.
 export function ManualEntryModal({ show, onClose, scannedId, isV2, discoveredDepartments, onComplete, toast }) {
   const [lastname, setLastname] = useState('');
   const [firstname, setFirstname] = useState('');
@@ -9,10 +13,15 @@ export function ManualEntryModal({ show, onClose, scannedId, isV2, discoveredDep
   const [year, setYear] = useState('');
   const [program, setProgram] = useState('');
   const [dept, setDept] = useState('');
+  const [years, setYears] = useState([]);
+  const [programs, setPrograms] = useState([]);
 
   useEffect(() => {
     if (show) {
       setLastname(''); setFirstname(''); setMiddlename(''); setYear(''); setProgram(''); setDept('');
+      // Pull real, currently-known values instead of leaving these as free text.
+      api('GET', '/api/events/meta/years').then(setYears).catch(() => setYears([]));
+      api('GET', '/api/events/meta/programs').then(setPrograms).catch(() => setPrograms([]));
     }
   }, [show]);
 
@@ -22,8 +31,7 @@ export function ManualEntryModal({ show, onClose, scannedId, isV2, discoveredDep
       lastname: lastname.trim(),
       firstname: firstname.trim(),
       middlename: middlename.trim() || null,
-      year: year.trim(),
-      program: program.trim(),
+      year, program,
       departmentId: null,
     };
     if (!body.lastname || !body.firstname || !body.year || !body.program) {
@@ -57,10 +65,22 @@ export function ManualEntryModal({ show, onClose, scannedId, isV2, discoveredDep
       </div>
       <div className="field-row">
         <div className="field"><label>Middle name (optional)</label><input type="text" value={middlename} onChange={(e) => setMiddlename(e.target.value)} /></div>
-        <div className="field"><label>Year</label><input type="text" placeholder="e.g. 1st Year" value={year} onChange={(e) => setYear(e.target.value)} /></div>
+        <div className="field">
+          <label>Year</label>
+          <select value={year} onChange={(e) => setYear(e.target.value)}>
+            <option value="">Select...</option>
+            {years.map((y) => <option key={y} value={y}>{y}</option>)}
+          </select>
+        </div>
       </div>
       <div className="field-row">
-        <div className="field"><label>Program</label><input type="text" placeholder="e.g. BSCS" value={program} onChange={(e) => setProgram(e.target.value)} /></div>
+        <div className="field">
+          <label>Program</label>
+          <select value={program} onChange={(e) => setProgram(e.target.value)}>
+            <option value="">Select...</option>
+            {programs.map((p) => <option key={p.code} value={p.code}>{p.code} — {p.name}</option>)}
+          </select>
+        </div>
         {isV2 && (
           <div className="field"><label>Department code</label><input type="text" placeholder="e.g. CCS" value={dept} onChange={(e) => setDept(e.target.value)} /></div>
         )}

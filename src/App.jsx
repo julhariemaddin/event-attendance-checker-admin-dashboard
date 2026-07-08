@@ -9,6 +9,7 @@ import { Sidebar }  from './components/Sidebar.jsx';
 import { MonitorView }     from './views/MonitorView.jsx';
 import { EventsView }      from './views/EventsView.jsx';
 import { RosterView }      from './views/RosterView.jsx';
+import { HistoryView }     from './views/HistoryView.jsx';
 import { ImportView }      from './views/ImportView.jsx';
 import { DepartmentsView } from './views/DepartmentsView.jsx';
 import { ScannerView }     from './views/ScannerView.jsx';
@@ -659,6 +660,9 @@ async function handleStopConfirm() {
               onDeleteClick={openDeleteEventConfirm}
             />
           )}
+          {safeView === 'history' && hasProfile && (
+            <HistoryView />
+          )}
           {safeView === 'roster' && hasProfile && (
             <RosterView
               roster={roster}
@@ -696,6 +700,10 @@ async function handleStopConfirm() {
         onClose={() => setModal(null)}
         departmentTemplates={departmentTemplates}
         onCreate={handleNewProfileCreate}
+        onGoCreateDepartment={() => {
+          setView('departments');
+          setModal('newDeptTemplate');
+        }}
         toast={toast}
       />
       <NewEventModal

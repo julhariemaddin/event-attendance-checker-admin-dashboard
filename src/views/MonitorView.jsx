@@ -38,6 +38,7 @@ export function MonitorView({
 
   const ev = events.find((e) => e.id === selectedEventId) || null;
   const hasEvent = !!selectedEventId;
+  const isPaused = ev?.status === 'PAUSED';
 
   const inside = records.filter((r) => r.status === 'LOGGED_IN');
   const out = records.filter((r) => r.status === 'COMPLETE');
@@ -92,6 +93,7 @@ export function MonitorView({
   function sendManual() {
     const id = manualId.trim();
     if (!selectedEventId) return toast('Select an event first.', 'err');
+    if (ev?.status === 'PAUSED') return toast('Event is paused — resume it first.', 'err');
     if (!id) return toast('Enter a student ID.', 'err');
     if (!wsConnected) return toast('Scanner link is not connected.', 'err');
     onSendManualScan({ eventId: selectedEventId, studentId: id, station: manualStation });
@@ -113,9 +115,11 @@ export function MonitorView({
             onChange={(e) => onSelectEvent(e.target.value ? Number(e.target.value) : null)}
           >
             <option value="">Select an event...</option>
-            {events.map((e) => (
-              <option key={e.id} value={e.id}>{e.name} — {e.eventDate} ({e.status})</option>
-            ))}
+            {events
+              .filter((e) => e.status === 'RUNNING' || e.status === 'PAUSED')
+              .map((e) => (
+                <option key={e.id} value={e.id}>{e.name} — {e.eventDate} ({e.status})</option>
+              ))}
           </select>
           <button className="btn" onClick={onRefresh}>REFRESH</button>
         </div>
@@ -132,19 +136,25 @@ export function MonitorView({
         <div id="monitorContent">
           <div className="card manual-scan-box">
             <div className="side-label" style={{ marginBottom: 12 }}>MANUAL SCAN</div>
+            {isPaused && (
+              <div style={{ marginBottom: 12, fontSize: 12, color: 'var(--accent-amber, #d35400)' }}>
+                Event is paused — resume it to accept scans again. Existing records below are still visible.
+              </div>
+            )}
             <div className="manual-scan-row">
               <input
                 type="text" className="mono" placeholder="Student ID"
                 value={manualId}
+                disabled={isPaused}
                 onChange={(e) => setManualId(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') sendManual(); }}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !isPaused) sendManual(); }}
               />
-              <select value={manualStation} onChange={(e) => setManualStation(e.target.value)}>
+              <select value={manualStation} disabled={isPaused} onChange={(e) => setManualStation(e.target.value)}>
                 <option value="LOGIN">Login</option>
                 <option value="LOGOUT">Logout</option>
               </select>
-              <button className="btn primary" onClick={sendManual}>SEND</button>
-              <button className="btn" onClick={() => { setSearchOpen((s) => !s); setSearchQuery(''); setSearchResults(null); }}>FIND BY NAME</button>
+              <button className="btn primary" disabled={isPaused} onClick={sendManual}>SEND</button>
+              <button className="btn" disabled={isPaused} onClick={() => { setSearchOpen((s) => !s); setSearchQuery(''); setSearchResults(null); }}>FIND BY NAME</button>
             </div>
             {searchOpen && (
               <div style={{ marginTop: 16 }}>

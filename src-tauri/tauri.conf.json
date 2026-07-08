@@ -32,10 +32,6 @@
       "process": {
         "all": false,
         "relaunch": true
-      },
-      "dialog": {
-        "all": false,
-        "open": true
       }
     },
     "bundle": {

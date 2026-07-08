@@ -78,7 +78,15 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
             )}
           </div>
           <a className="btn" href={onExportUrl} download>⇩ EXPORT CSV</a>
-          <button className="btn primary" onClick={onNewStudent}>+ ADD PERSON</button>
+          <button
+            className="btn primary"
+            disabled={totalStudents === 0}
+            title={totalStudents === 0 ? 'Import a roster first' : undefined}
+            style={totalStudents === 0 ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
+            onClick={onNewStudent}
+          >
+            + ADD PERSON
+          </button>
         </div>
       </div>
 

@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react';
 import { Modal } from '../components/Modal.jsx';
 
 // Ported from #modalNewProfile + newProfileBtn/npCreateBtn handlers in admin.js.
-export function NewProfileModal({ show, onClose, departmentTemplates, onCreate, toast }) {
+// EDIT: when mode is V1 and no department templates exist yet, the create
+// button relabels to "CREATE DEPARTMENT" and redirects to the Departments
+// tab (opening NewDeptTemplateModal directly) instead of failing on submit.
+export function NewProfileModal({ show, onClose, departmentTemplates, onCreate, onGoCreateDepartment, toast }) {
   const [name, setName] = useState('');
   const [mode, setMode] = useState('V1');
   const [deptId, setDeptId] = useState('');
@@ -17,7 +20,15 @@ export function NewProfileModal({ show, onClose, departmentTemplates, onCreate, 
     }
   }, [show, departmentTemplates]);
 
+  const v1Blocked = mode === 'V1' && departmentTemplates.length === 0;
+
   async function handleCreate() {
+    if (v1Blocked) {
+      // No department templates exist — redirect instead of failing on submit.
+      onClose();
+      onGoCreateDepartment();
+      return;
+    }
     const trimmed = name.trim();
     if (!trimmed) return toast('Give the profile a name first.', 'err');
     const deptTemplateId = mode === 'V1' ? (Number(deptId) || null) : null;
@@ -29,7 +40,9 @@ export function NewProfileModal({ show, onClose, departmentTemplates, onCreate, 
     <Modal show={show} onClose={onClose} title="New profile" footer={(
       <>
         <button className="btn" onClick={onClose}>CANCEL</button>
-        <button className="btn primary" onClick={handleCreate}>CREATE PROFILE</button>
+        <button className="btn primary" onClick={handleCreate}>
+          {v1Blocked ? 'CREATE DEPARTMENT' : 'CREATE PROFILE'}
+        </button>
       </>
     )}>
       <div className="field">
@@ -47,13 +60,17 @@ export function NewProfileModal({ show, onClose, departmentTemplates, onCreate, 
       {mode === 'V1' && (
         <div className="field">
           <label>Department</label>
-          <select value={deptId} onChange={(e) => setDeptId(e.target.value)}>
-            {departmentTemplates.length === 0
-              ? <option value="">No templates yet — add one in Departments tab</option>
-              : departmentTemplates.map((d) => (
+          {departmentTemplates.length === 0 ? (
+            <div className="hint" style={{ padding: '10px 0' }}>
+              No department templates yet — clicking "CREATE DEPARTMENT" will take you to the Departments tab.
+            </div>
+          ) : (
+            <select value={deptId} onChange={(e) => setDeptId(e.target.value)}>
+              {departmentTemplates.map((d) => (
                 <option key={d.id} value={d.id}>{d.code} — {d.name || ''}</option>
               ))}
-          </select>
+            </select>
+          )}
         </div>
       )}
     </Modal>
