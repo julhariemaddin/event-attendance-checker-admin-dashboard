@@ -67,9 +67,16 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
     setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
   }
 
+  // Mirrors the backend guard in EventService.createEvent — an event with
+  // nobody on the roster would reject every scan as unrecognized, so block
+  // it here too instead of only finding out after a failed submit.
+  const rosterLoaded = Array.isArray(years) && Array.isArray(programs);
+  const noRoster = rosterLoaded && years.length === 0 && programs.length === 0;
+
   async function handleCreate() {
     const trimmedName = name.trim();
     if (!trimmedName || !date) return toast('Name and date are required.', 'err');
+    if (noRoster) return toast('Import a student roster before creating an event.', 'err');
 
     const allYears = Array.isArray(years) ? years : [];
     const allPrograms = Array.isArray(programs) ? programs.map((p) => p.code) : [];
@@ -92,9 +99,17 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
     <Modal show={show} onClose={onClose} title="New event" footer={(
       <>
         <button className="btn" onClick={onClose}>CANCEL</button>
-        <button className="btn primary" onClick={handleCreate}>CREATE EVENT</button>
+        <button className="btn primary" disabled={noRoster} onClick={handleCreate}>CREATE EVENT</button>
       </>
     )}>
+      {noRoster && (
+        <div style={{
+          marginBottom: 16, padding: '10px 12px', borderRadius: 8,
+          background: 'var(--accent-red-tint, #fdecea)', color: 'var(--accent-red, #b91c1c)', fontSize: 13,
+        }}>
+          No students in this profile's roster yet — import a roster first. An event can't be created until there's someone to check in.
+        </div>
+      )}
       <div className="field">
         <label>Event name</label>
         <input type="text" placeholder="e.g. Day 1" value={name} onChange={(e) => setName(e.target.value)} />

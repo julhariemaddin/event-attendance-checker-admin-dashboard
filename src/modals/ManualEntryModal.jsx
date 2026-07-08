@@ -4,10 +4,15 @@ import { api } from '../api/client.js';
 
 // Ported from #modalManualEntry + openManualEntry()/meCreateBtn handler in admin.js.
 // EDIT: Department/Year/Program dropdowns are scoped to THIS EVENT's own
-// filterJson via /api/events/{eventId}/manual-entry-options — not the
-// entire profile roster — and cascade further as staff pick a department
-// or program, per improvement #1.
-export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, onComplete, toast }) {
+// filterJson via /api/events/{eventId}/manual-entry-options — cascading as
+// staff pick a department or program, per improvement #1.
+// EDIT: queue-aware — App.jsx now holds a queue of pending unknown scans
+// instead of a single value, so a second unknown scan arriving while one
+// is already being resolved no longer silently overwrites the first.
+// queuePosition/queueTotal show "X of Y pending" so admins know more are
+// waiting; scannedId changing (next item in queue) resets the form even
+// though `show` itself stays true across the transition.
+export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, queuePosition, queueTotal, onComplete, toast }) {
   const [lastname, setLastname] = useState('');
   const [firstname, setFirstname] = useState('');
   const [middlename, setMiddlename] = useState('');
@@ -20,16 +25,20 @@ export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, onCo
   const [years, setYears] = useState([]);
   const [loadingOptions, setLoadingOptions] = useState(false);
 
+  // Keyed on scannedId (not just show) — advancing to the next queued
+  // student keeps `show` true the whole time, so scannedId changing is
+  // what actually signals "this is a different student now, clear the form."
   useEffect(() => {
     if (show) {
       setLastname(''); setFirstname(''); setMiddlename('');
       setYear(''); setProgram(''); setDepartmentId('');
     }
-  }, [show]);
+  }, [show, scannedId]);
 
-  // Re-fetch options whenever the modal opens, or the department/program
-  // selection changes — this is the cascade: pick a department, the
-  // program list narrows; pick a program, the year list narrows.
+  // Re-fetch options whenever the modal opens, the queue advances to a new
+  // student, or the department/program selection changes — this is the
+  // cascade: pick a department, the program list narrows; pick a program,
+  // the year list narrows.
   useEffect(() => {
     if (!show || !eventId) return;
     setLoadingOptions(true);
@@ -48,7 +57,7 @@ export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, onCo
         toast('Could not load filter options for this event.', 'err');
       })
       .finally(() => setLoadingOptions(false));
-  }, [show, eventId, departmentId, program]);
+  }, [show, eventId, scannedId, departmentId, program]);
 
   function handleDepartmentChange(id) {
     setDepartmentId(id);
@@ -80,18 +89,30 @@ export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, onCo
     await onComplete(body);
   }
 
+  const hasMorePending = queueTotal > 1;
+
   return (
     <Modal show={show} onClose={onClose} title="Complete unknown entry" footer={(
       <>
-        <button className="btn" onClick={onClose}>DISMISS</button>
+        <button className="btn" onClick={onClose}>{hasMorePending ? 'SKIP' : 'DISMISS'}</button>
         <button className="btn primary" onClick={handleComplete}>COMPLETE LOGIN</button>
       </>
     )}>
+      {hasMorePending && (
+        <div style={{
+          display: 'inline-block', marginBottom: 12, padding: '4px 10px', borderRadius: 999,
+          background: 'var(--accent-amber-tint, #fdf1e0)', color: 'var(--accent-amber, #d35400)',
+          fontSize: 12, fontWeight: 600,
+        }}>
+          {queuePosition} of {queueTotal} pending
+        </div>
+      )}
       <p style={{ margin: '0 0 16px', fontSize: 13, lineHeight: 1.6 }}>
         ID <strong className="mono">{scannedId}</strong> isn't registered. Fill in details to complete login.
       </p>
       <p style={{ margin: '0 0 16px', fontSize: 12, color: 'var(--text-muted)' }}>
         Only programs/years/departments allowed by this event's filter are shown below.
+        {hasMorePending && ' Skipping moves to the next pending entry — nothing is lost.'}
       </p>
       <div className="field-row">
         <div className="field"><label>Last name</label><input type="text" value={lastname} onChange={(e) => setLastname(e.target.value)} /></div>

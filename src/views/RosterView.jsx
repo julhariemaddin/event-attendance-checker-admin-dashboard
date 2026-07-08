@@ -5,14 +5,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 //
 // PERF: at 8–10k students, filtering/re-rendering the full matched list on
 // every keystroke is what made typing feel laggy — not the search algorithm
-// itself. Two changes fix this:
+// itself. Fixes:
 //   1. The text field's value updates instantly (feels responsive), but the
 //      value actually used for filtering is debounced ~180ms behind it, so
 //      the expensive filter+render only runs once typing pauses.
-//   2. Rendered rows are hard-capped (MAX_RENDERED_ROWS) regardless of query
-//      breadth, so a broad/empty search can never force thousands of DOM
-//      nodes at once — a "narrow your search" notice shows instead.
-const MAX_RENDERED_ROWS = 300;
+//   2. Program sections default to COLLAPSED, and collapsed sections never
+//      mount their row DOM at all (see the AnimatePresence block below) —
+//      so switching to "All programs" with a large roster only ever costs
+//      rendering the section headers/counts until something is opened.
+//   3. Rows are capped PER PROGRAM (not globally — see BUGFIX note below)
+//      so an individual very-large expanded program doesn't hang the tab.
 const SEARCH_DEBOUNCE_MS = 180;
 
 export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, onDeleteStudent }) {
@@ -64,14 +66,20 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
 
   const filteredCount = matchedPrograms.reduce((n, p) => n + p.count, 0);
 
-  // Cap total rendered rows regardless of how broad the match is — this is
-  // what actually keeps the DOM small; filteredCount above stays the true,
-  // uncapped total for the summary chip.
-  const { renderedPrograms, truncated } = useMemo(() => {
-    let remaining = MAX_RENDERED_ROWS;
-    const out = [];
-    for (const program of matchedPrograms) {
-      if (remaining <= 0) break;
+  // BUGFIX: the previous version capped MAX_RENDERED_ROWS across ALL
+  // programs combined using one shared counter — if the first program
+  // alone had more matches than the cap, the loop broke before ever
+  // reaching the second program, making "All programs" silently show
+  // only one. Capping is now per-program instead, so every program
+  // always gets its own header + count, regardless of how big any other
+  // program is. Combined with defaulting sections to collapsed below,
+  // rows for a program aren't actually rendered into the DOM at all
+  // until that section is opened — which is the real fix for the
+  // original lag, not the row cap.
+  const PER_PROGRAM_ROW_CAP = 300;
+  const renderedPrograms = useMemo(() => {
+    return matchedPrograms.map((program) => {
+      let remaining = PER_PROGRAM_ROW_CAP;
       const yearBlocks = [];
       for (const yb of program.yearBlocks) {
         if (remaining <= 0) break;
@@ -79,18 +87,30 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
         remaining -= rows.length;
         yearBlocks.push({ year: yb.year, rows });
       }
-      out.push({ programName: program.programName, yearBlocks, count: yearBlocks.reduce((n, b) => n + b.rows.length, 0) });
-    }
-    return { renderedPrograms: out, truncated: filteredCount > MAX_RENDERED_ROWS };
-  }, [matchedPrograms, filteredCount]);
+      const shown = yearBlocks.reduce((n, b) => n + b.rows.length, 0);
+      return { programName: program.programName, yearBlocks, count: program.count, truncated: shown < program.count };
+    });
+  }, [matchedPrograms]);
 
   function handleDeptChange(e) {
     setDeptIdx(Number(e.target.value));
     setProgramIdx(-1);
   }
 
+  // Default to collapsed when browsing "All programs" with no active
+  // search — this is what actually avoids rendering thousands of rows at
+  // once, per the fix above. Picking one specific program from the
+  // dropdown, or typing a search query, auto-expands since that's an
+  // explicit narrowing action — the person clearly wants to see the result.
+  function isProgramCollapsedByDefault() {
+    return programIdx === -1 && !q && matchedPrograms.length > 1;
+  }
+  function isProgramCollapsed(name) {
+    const explicit = collapsed[name];
+    return explicit !== undefined ? explicit : isProgramCollapsedByDefault();
+  }
   function toggleProgram(name) {
-    setCollapsed((prev) => ({ ...prev, [name]: !prev[name] }));
+    setCollapsed((prev) => ({ ...prev, [name]: !isProgramCollapsed(name) }));
   }
 
   function initials(s) {
@@ -154,11 +174,6 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
             <span className="roster-summary-label">{q ? `of ${totalStudents} match` : 'enrolled'}</span>
           </div>
         </div>
-        {truncated && (
-          <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-muted)' }}>
-            Showing the first {MAX_RENDERED_ROWS} of {filteredCount} matches — narrow your search or pick a program to see more.
-          </div>
-        )}
       </div>
 
       {totalStudents === 0 ? (
@@ -174,7 +189,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           {renderedPrograms.map((program, pi) => {
-            const isCollapsed = !!collapsed[program.programName];
+            const isCollapsed = isProgramCollapsed(program.programName);
             return (
               <div className="card roster-program-card2" key={pi}>
                 <button className="roster-program-head2" onClick={() => toggleProgram(program.programName)}>
@@ -193,6 +208,11 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
                       style={{ overflow: 'hidden' }}
                     >
                       <div style={{ padding: '4px 6px 14px' }}>
+                        {program.truncated && (
+                          <div style={{ margin: '0 0 10px', fontSize: 12, color: 'var(--text-muted)' }}>
+                            Showing the first {program.yearBlocks.reduce((n, b) => n + b.rows.length, 0)} of {program.count} in this program — narrow your search to see the rest.
+                          </div>
+                        )}
                         {program.yearBlocks.map((yb, yi) => (
                           <div key={yi} style={{ marginBottom: 4 }}>
                             <div className="roster-year-chip">Year {yb.year}</div>

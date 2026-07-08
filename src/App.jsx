@@ -76,6 +76,12 @@ export default function App({ onBack, onLogout }) {
   const [events,         setEvents]         = useState([]);
   const [selectedEventId,setSelectedEventId]= useState(null);
   const [historyExpandId, setHistoryExpandId] = useState(null);
+  // Stable per-session ID for the desktop's OWN manual-scan row — tags
+  // outgoing scans so phones don't flash an overlay for a scan the admin
+  // typed directly into Live Monitor. Generated once, not per-scan.
+  const desktopDeviceIdRef = useRef(
+    (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : 'desktop-' + Date.now()
+  );
   const [records,        setRecords]        = useState([]);
   const [enrolledCount,  setEnrolledCount]  = useState(null);
   const [feed,           setFeed]           = useState([]);
@@ -91,7 +97,7 @@ export default function App({ onBack, onLogout }) {
   const [pendingDeleteDept,   setPendingDeleteDept]    = useState(null);
   const [pendingDeleteStudent,setPendingDeleteStudent] = useState(null);
   const [editingStudent,      setEditingStudent]       = useState(null); // null = create mode
-  const [pendingManualScan,   setPendingManualScan]    = useState(null);
+  const [manualQueue,         setManualQueue]         = useState([]); // pending NEEDS_MANUAL_ENTRY scans, FIFO
   const [reportFiles,         setReportFiles]          = useState([]);
   const [reportEventId,       setReportEventId]        = useState(null);
 
@@ -123,8 +129,36 @@ export default function App({ onBack, onLogout }) {
     });
 
     if (data.outcome === 'NEEDS_MANUAL_ENTRY') {
-      setPendingManualScan({ studentId: data.studentId });
-      setModal('manualEntry');
+      // Queued, not overwritten — a second unknown scan arriving while the
+      // first is still being resolved used to silently replace it and lose
+      // that first scan entirely. Now it waits its turn.
+      //
+      // Also deduped by studentId: if the SAME unresolved ID gets scanned
+      // again — same phone double-tapping, or a second phone scanning the
+      // same unknown student — that shouldn't create a second queue entry
+      // for the admin to fill in twice. Instead, that phone's deviceId is
+      // merged into the existing entry, so completing it once notifies
+      // every phone that scanned this ID, not just whichever was first.
+      const incomingDeviceId = data.deviceId || null;
+      setManualQueue((prev) => {
+        const existingIdx = prev.findIndex((e) => e.studentId === data.studentId);
+        if (existingIdx !== -1) {
+          const next = [...prev];
+          const existing = next[existingIdx];
+          const deviceIds = incomingDeviceId && !existing.deviceIds.includes(incomingDeviceId)
+            ? [...existing.deviceIds, incomingDeviceId]
+            : existing.deviceIds;
+          next[existingIdx] = { ...existing, deviceIds };
+          return next;
+        }
+        const entry = {
+          queueId: (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : Date.now() + '-' + Math.random(),
+          studentId: data.studentId,
+          deviceIds: incomingDeviceId ? [incomingDeviceId] : [],
+        };
+        return [...prev, entry];
+      });
+      setModal('manualEntry'); // no-op if already open on an earlier queued entry
     }
 
     if (selectedEventIdRef.current) {
@@ -392,7 +426,7 @@ async function handleStopConfirm() {
   }
 
   function sendManualScan(payload) {
-    if (!sendScan(payload)) toast('Scanner link is not connected.', 'err');
+    if (!sendScan({ ...payload, deviceId: desktopDeviceIdRef.current })) toast('Scanner link is not connected.', 'err');
   }
 
   // ============================================================
@@ -563,16 +597,31 @@ async function handleStopConfirm() {
       toast('Select the event this scan belongs to first.', 'err');
       return;
     }
+    const current = manualQueue[0];
     try {
-      await api('POST', '/api/scan/manual-entry', { ...body, eventId: selectedEventId });
+      await api('POST', '/api/scan/manual-entry', {
+        ...body,
+        eventId: selectedEventId,
+        deviceIds: current?.deviceIds ?? [], // every phone that scanned this ID gets the result
+      });
       toast(`Login completed for ${body.firstname} ${body.lastname}`, 'ok');
-      setModal(null);
-      setPendingManualScan(null);
+      advanceManualQueue();
       loadMonitorForSelectedEvent();
       loadStudents();
     } catch (err) {
       toast('Manual entry failed: ' + err.message, 'err');
     }
+  }
+
+  // Drops the entry currently on screen — either because it was completed,
+  // or the admin chose to skip/dismiss it — and moves to the next queued
+  // entry if one exists, closing the modal only once the queue is empty.
+  function advanceManualQueue() {
+    setManualQueue((prev) => {
+      const next = prev.slice(1);
+      if (next.length === 0) setModal(null);
+      return next;
+    });
   }
 
   // ============================================================
@@ -750,10 +799,12 @@ async function handleStopConfirm() {
   loading={stopping}
 />
       <ManualEntryModal
-        show={modal === 'manualEntry'}
-        onClose={() => setModal(null)}
+        show={modal === 'manualEntry' && manualQueue.length > 0}
+        onClose={advanceManualQueue}
         eventId={selectedEventId}
-        scannedId={pendingManualScan?.studentId ?? ''}
+        scannedId={manualQueue[0]?.studentId ?? ''}
+        queuePosition={1}
+        queueTotal={manualQueue.length}
         isV2={isV2}
         onComplete={handleManualEntryComplete}
         toast={toast}
