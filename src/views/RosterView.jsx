@@ -1,13 +1,34 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 // Ported from #view-roster markup + populateRosterDeptSelect/renderRoster in admin.js.
+//
+// PERF: at 8–10k students, filtering/re-rendering the full matched list on
+// every keystroke is what made typing feel laggy — not the search algorithm
+// itself. Two changes fix this:
+//   1. The text field's value updates instantly (feels responsive), but the
+//      value actually used for filtering is debounced ~180ms behind it, so
+//      the expensive filter+render only runs once typing pauses.
+//   2. Rendered rows are hard-capped (MAX_RENDERED_ROWS) regardless of query
+//      breadth, so a broad/empty search can never force thousands of DOM
+//      nodes at once — a "narrow your search" notice shows instead.
+const MAX_RENDERED_ROWS = 300;
+const SEARCH_DEBOUNCE_MS = 180;
+
 export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, onDeleteStudent }) {
   const depts = roster.departments || [];
   const [deptIdx, setDeptIdx] = useState(0);
   const [programIdx, setProgramIdx] = useState(-1);
-  const [search, setSearch] = useState('');
+  const [searchInput, setSearchInput] = useState(''); // what the text field shows, updates instantly
+  const [search, setSearch] = useState('');            // debounced value actually used for filtering
   const [collapsed, setCollapsed] = useState({}); // programName -> bool
+  const debounceRef = useRef(null);
+
+  useEffect(() => {
+    clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => setSearch(searchInput), SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(debounceRef.current);
+  }, [searchInput]);
 
   const safeDeptIdx = deptIdx < depts.length ? deptIdx : 0;
   const dept = depts[safeDeptIdx];
@@ -17,7 +38,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
 
   const q = search.toLowerCase().trim();
 
-  const renderedPrograms = useMemo(() => {
+  const matchedPrograms = useMemo(() => {
     if (!dept) return [];
     const programsToShow = programIdx === -1 ? dept.programs : [dept.programs[programIdx]].filter(Boolean);
     return programsToShow
@@ -41,7 +62,27 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
       .filter(Boolean);
   }, [dept, programIdx, q]);
 
-  const filteredCount = renderedPrograms.reduce((n, p) => n + p.count, 0);
+  const filteredCount = matchedPrograms.reduce((n, p) => n + p.count, 0);
+
+  // Cap total rendered rows regardless of how broad the match is — this is
+  // what actually keeps the DOM small; filteredCount above stays the true,
+  // uncapped total for the summary chip.
+  const { renderedPrograms, truncated } = useMemo(() => {
+    let remaining = MAX_RENDERED_ROWS;
+    const out = [];
+    for (const program of matchedPrograms) {
+      if (remaining <= 0) break;
+      const yearBlocks = [];
+      for (const yb of program.yearBlocks) {
+        if (remaining <= 0) break;
+        const rows = yb.rows.slice(0, remaining);
+        remaining -= rows.length;
+        yearBlocks.push({ year: yb.year, rows });
+      }
+      out.push({ programName: program.programName, yearBlocks, count: yearBlocks.reduce((n, b) => n + b.rows.length, 0) });
+    }
+    return { renderedPrograms: out, truncated: filteredCount > MAX_RENDERED_ROWS };
+  }, [matchedPrograms, filteredCount]);
 
   function handleDeptChange(e) {
     setDeptIdx(Number(e.target.value));
@@ -70,11 +111,11 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
             <span className="roster-search-icon">⌕</span>
             <input
               type="text" className="mono roster-search-input" placeholder="Search name or ID…"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
             />
-            {search && (
-              <button className="roster-search-clear" onClick={() => setSearch('')} aria-label="Clear search">✕</button>
+            {searchInput && (
+              <button className="roster-search-clear" onClick={() => setSearchInput('')} aria-label="Clear search">✕</button>
             )}
           </div>
           <a className="btn" href={onExportUrl} download>⇩ EXPORT CSV</a>
@@ -113,6 +154,11 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
             <span className="roster-summary-label">{q ? `of ${totalStudents} match` : 'enrolled'}</span>
           </div>
         </div>
+        {truncated && (
+          <div style={{ marginTop: 10, fontSize: 12, color: 'var(--text-muted)' }}>
+            Showing the first {MAX_RENDERED_ROWS} of {filteredCount} matches — narrow your search or pick a program to see more.
+          </div>
+        )}
       </div>
 
       {totalStudents === 0 ? (

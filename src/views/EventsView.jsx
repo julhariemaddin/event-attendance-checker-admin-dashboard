@@ -6,7 +6,7 @@ function StatusBadge({ status }) {
   return <span className="badge b-grey">{status}</span>;
 }
 
-export function EventsView({ events, onNewEvent, onMonitor, onReports, onDeleteClick }) {
+export function EventsView({ events, onNewEvent, onMonitor, onHistory, onReports, onDeleteClick }) {
   return (
     <div className="view active" id="view-events">
       <div className="view-header">
@@ -30,7 +30,9 @@ export function EventsView({ events, onNewEvent, onMonitor, onReports, onDeleteC
                 <td><StatusBadge status={e.status} /></td>
                 <td>
                   <div className="row-actions">
-                    <button className="btn small" onClick={() => onMonitor(e.id)}>MONITOR</button>
+                    {e.status === 'STOPPED'
+                      ? <button className="btn small" onClick={() => onHistory(e.id)}>HISTORY</button>
+                      : <button className="btn small" onClick={() => onMonitor(e.id)}>MONITOR</button>}
                     {e.status === 'STOPPED' && <button className="btn small" onClick={() => onReports(e.id)}>REPORTS</button>}
                     {e.status === 'STOPPED' && <button className="btn small danger" onClick={() => onDeleteClick(e.id, e.name)}>DELETE</button>}
                   </div>

@@ -75,6 +75,7 @@ export default function App({ onBack, onLogout }) {
 
   const [events,         setEvents]         = useState([]);
   const [selectedEventId,setSelectedEventId]= useState(null);
+  const [historyExpandId, setHistoryExpandId] = useState(null);
   const [records,        setRecords]        = useState([]);
   const [enrolledCount,  setEnrolledCount]  = useState(null);
   const [feed,           setFeed]           = useState([]);
@@ -597,6 +598,14 @@ async function handleStopConfirm() {
     loadMonitorForSelectedEvent(eventId);
   }
 
+  // Stopped events no longer have anything to "monitor" — they're finished.
+  // This takes the place of MONITOR for STOPPED rows in EventsView, and
+  // pre-expands that event's card so the summary is immediately visible.
+  function goToHistoryForEvent(eventId) {
+    setHistoryExpandId(eventId);
+    switchView('history');
+  }
+
   const safeView = (PROFILE_REQUIRED_VIEWS.has(view) && !hasProfile) ? 'departments' : view;
 
   // ============================================================
@@ -656,12 +665,13 @@ async function handleStopConfirm() {
               events={events}
               onNewEvent={() => setModal('newEvent')}
               onMonitor={goToMonitorForEvent}
+              onHistory={goToHistoryForEvent}
               onReports={showReportLinks}
               onDeleteClick={openDeleteEventConfirm}
             />
           )}
           {safeView === 'history' && hasProfile && (
-            <HistoryView />
+            <HistoryView expandEventId={historyExpandId} onExpandHandled={() => setHistoryExpandId(null)} />
           )}
           {safeView === 'roster' && hasProfile && (
             <RosterView
@@ -742,9 +752,9 @@ async function handleStopConfirm() {
       <ManualEntryModal
         show={modal === 'manualEntry'}
         onClose={() => setModal(null)}
+        eventId={selectedEventId}
         scannedId={pendingManualScan?.studentId ?? ''}
         isV2={isV2}
-        discoveredDepartments={discoveredDepartments}
         onComplete={handleManualEntryComplete}
         toast={toast}
       />

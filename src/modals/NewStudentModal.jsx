@@ -5,6 +5,9 @@ import { api } from '../api/client.js';
 // Ported from #modalNewStudent + newStudentBtn/nsCreateBtn handlers in admin.js.
 // `editing`: null = create mode. A student object = edit mode (fields pre-filled,
 // PUT sent with oldStudentId so the backend can find the row even if the ID itself changed).
+// EDIT: Year is now a dropdown sourced from /api/roster/year-options, same
+// treatment as Program — never free text, only real values already in the
+// roster. Applies in both V1 and V2; Department dropdown (V2-only) unchanged.
 export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast }) {
   const isEdit = !!editing;
 
@@ -16,6 +19,7 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
   const [program, setProgram] = useState('');
   const [deptId, setDeptId] = useState('');
 
+  const [yearOptions, setYearOptions] = useState(null);
   const [programOptions, setProgramOptions] = useState(null);
   const [deptOptions, setDeptOptions] = useState(null);
 
@@ -33,8 +37,18 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
     } else {
       setStudentId(''); setLastname(''); setFirstname(''); setMiddlename(''); setYear(''); setProgram(''); setDeptId('');
     }
+    setYearOptions(null);
     setProgramOptions(null);
     setDeptOptions(null);
+
+    (async () => {
+      try {
+        const y = await api('GET', '/api/roster/year-options');
+        setYearOptions(y);
+      } catch (_) {
+        setYearOptions('error');
+      }
+    })();
 
     (async () => {
       try {
@@ -63,7 +77,7 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
       lastname: lastname.trim(),
       firstname: firstname.trim(),
       middlename: middlename.trim() || null,
-      year: year.trim(),
+      year,
       program,
       departmentId: null,
     };
@@ -94,7 +108,23 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
       </div>
       <div className="field-row">
         <div className="field"><label>Middle name (optional)</label><input type="text" value={middlename} onChange={(e) => setMiddlename(e.target.value)} /></div>
-        <div className="field"><label>Year</label><input type="text" placeholder="e.g. 1st Year" value={year} onChange={(e) => setYear(e.target.value)} /></div>
+        <div className="field">
+          <label>Year</label>
+          <select value={year} onChange={(e) => setYear(e.target.value)}>
+            <option value="">
+              {yearOptions === null ? 'Loading...' : yearOptions === 'error' || (Array.isArray(yearOptions) && yearOptions.length === 0) ? 'No years yet — import a file first' : 'Select a year...'}
+            </option>
+            {Array.isArray(yearOptions) && yearOptions.map((y) => (
+              <option key={y} value={y}>{y}</option>
+            ))}
+            {/* Edit mode may have a year value that isn't in the discovered
+                list yet (e.g. the roster was later trimmed) — keep it
+                selectable so editing doesn't silently blank a valid field. */}
+            {isEdit && year && Array.isArray(yearOptions) && !yearOptions.includes(year) && (
+              <option value={year}>{year}</option>
+            )}
+          </select>
+        </div>
       </div>
       <div className="field">
         <label>Program</label>

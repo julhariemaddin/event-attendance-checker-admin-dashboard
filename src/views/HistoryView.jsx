@@ -5,7 +5,7 @@ import { api } from '../api/client.js';
 // lazy-loaded summary card (total scans, late arrivals, total logged out).
 // Paused events are intentionally excluded — they still belong in Live
 // Monitor since they're resumable, not finished.
-export function HistoryView() {
+export function HistoryView({ expandEventId, onExpandHandled }) {
   const [events, setEvents] = useState([]);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
@@ -31,6 +31,17 @@ export function HistoryView() {
     const id = setTimeout(() => load(search), 250);
     return () => clearTimeout(id);
   }, [search]);
+
+  // Arriving here via EventsView's HISTORY button (stopped events no longer
+  // show MONITOR) — jump straight to that event's expanded summary once the
+  // list has loaded, instead of leaving the person to find it themselves.
+  useEffect(() => {
+    if (!expandEventId || loading) return;
+    if (events.some((e) => e.id === expandEventId)) {
+      toggleExpand(expandEventId);
+    }
+    onExpandHandled?.();
+  }, [expandEventId, loading, events]);
 
   async function toggleExpand(eventId) {
     if (expandedId === eventId) { setExpandedId(null); return; }

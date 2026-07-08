@@ -82,7 +82,11 @@ export function MonitorView({
     if (q.trim().length < 2) { setSearchResults(null); return; }
     debounceRef.current = setTimeout(async () => {
       try {
-        const results = await api('GET', '/api/roster/search?query=' + encodeURIComponent(q.trim()));
+        // Scoped to the current event's own filter — searching "John" during
+        // a CCS-only event shouldn't surface students outside that filter.
+        const qs = 'query=' + encodeURIComponent(q.trim())
+          + (selectedEventId ? '&eventId=' + selectedEventId : '');
+        const results = await api('GET', '/api/roster/search?' + qs);
         setSearchResults(results);
       } catch (_) {
         setSearchResults('error');
