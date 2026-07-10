@@ -111,6 +111,21 @@ export default function App({ onBack, onLogout }) {
     onServerStatusChange((up) => setServerUp(up));
   }, []);
 
+  // Safety net beyond handleStopConfirm's own cleanup: if the currently
+  // selected event ever ends up STOPPED for any other reason (a refresh
+  // picking up a change made elsewhere, etc.), drop the Monitor selection
+  // instead of leaving stale stats/log/manual-scan UI pointed at a dead event.
+  useEffect(() => {
+    if (!selectedEventId) return;
+    const current = events.find((e) => e.id === selectedEventId);
+    if (current && current.status !== 'RUNNING' && current.status !== 'PAUSED') {
+      setSelectedEventId(null);
+      setRecords([]);
+      setFeed([]);
+      setEnrolledCount(null);
+    }
+  }, [events, selectedEventId]);
+
   const selectedEventIdRef = useRef(selectedEventId);
   selectedEventIdRef.current = selectedEventId;
   const quietTimerRef = useRef(null);
@@ -365,8 +380,15 @@ async function handleStopConfirm() {
     setModal(null);
     const count = res.reportPaths?.length ?? 0;
     toast(`Event stopped — ${count} report${count !== 1 ? 's' : ''} generated`, 'ok');
-    const updated = await loadEvents();
-    loadMonitorForSelectedEvent(selectedEventId, updated);
+    await loadEvents();
+    // A stopped event no longer belongs in Live Monitor — it's an Events/
+    // History concern now. Without this, the dropdown goes blank (its
+    // option list is RUNNING/PAUSED only) while the rest of the panel
+    // keeps rendering the now-stale stopped event's stats underneath it.
+    setSelectedEventId(null);
+    setRecords([]);
+    setFeed([]);
+    setEnrolledCount(null);
   } catch (err) {
     toast('Stop failed: ' + err.message, 'err');
   } finally {
