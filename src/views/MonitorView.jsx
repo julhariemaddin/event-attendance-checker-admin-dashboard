@@ -39,6 +39,11 @@ export function MonitorView({
   const ev = events.find((e) => e.id === selectedEventId) || null;
   const hasEvent = !!selectedEventId;
   const isPaused = ev?.status === 'PAUSED';
+  const noLogout = ev?.hasLogout === false;
+
+  useEffect(() => {
+    if (noLogout && manualStation === 'LOGOUT') setManualStation('LOGIN');
+  }, [noLogout, manualStation]);
 
   const inside = records.filter((r) => r.status === 'LOGGED_IN');
   const out = records.filter((r) => r.status === 'COMPLETE');
@@ -98,6 +103,7 @@ export function MonitorView({
     const id = manualId.trim();
     if (!selectedEventId) return toast('Select an event first.', 'err');
     if (ev?.status === 'PAUSED') return toast('Event is paused — resume it first.', 'err');
+    if (noLogout && manualStation === 'LOGOUT') return toast('This event has no logout station — login only.', 'err');
     if (!id) return toast('Enter a student ID.', 'err');
     if (!wsConnected) return toast('Scanner link is not connected.', 'err');
     onSendManualScan({ eventId: selectedEventId, studentId: id, station: manualStation });
@@ -155,7 +161,7 @@ export function MonitorView({
               />
               <select value={manualStation} disabled={isPaused} onChange={(e) => setManualStation(e.target.value)}>
                 <option value="LOGIN">Login</option>
-                <option value="LOGOUT">Logout</option>
+                <option value="LOGOUT" disabled={noLogout}>{noLogout ? 'Logout (disabled for this event)' : 'Logout'}</option>
               </select>
               <button className="btn primary" disabled={isPaused} onClick={sendManual}>SEND</button>
               <button className="btn" disabled={isPaused} onClick={() => { setSearchOpen((s) => !s); setSearchQuery(''); setSearchResults(null); }}>FIND BY NAME</button>

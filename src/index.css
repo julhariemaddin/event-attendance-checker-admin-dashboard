@@ -384,36 +384,102 @@ select:focus-visible, textarea:focus-visible, .nav-btn:focus-visible,
 
 /* ============================================================
    Modals
+   Redesigned for two real problems the old version had:
+     1. BOTH .modal and .modal-body had independent overflow-y:auto —
+        two nested scrollbars on the same content, confusing on desktop
+        and actively broken-feeling on mobile trackpads/touch.
+     2. No mobile breakpoint at all — a 500px-wide dialog with
+        flex-end-aligned footer buttons on a 360px phone screen meant
+        cramped, hard-to-tap buttons and awkward wrapping.
+   Fix: exactly one scroll container (.modal-body), a real mobile
+   layout (near-fullscreen sheet, stacked full-width footer buttons),
+   and radius/elevation brought in line with the rest of the app
+   (cards already use 12–14px radius — the modal using 0 read as an
+   inconsistency, not a deliberate style choice).
 ============================================================ */
 .modal-backdrop {
-  position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(2px);
-  display: none; align-items: center; justify-content: center; z-index: 1000; padding: 16px;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.72); backdrop-filter: blur(4px);
+  display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px;
 }
-.modal-backdrop.show { display: flex; }
-.modal {
-  background: var(--bg-surface); border: 1px solid var(--border);
-  width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
-  box-shadow: 0 24px 48px var(--shadow-color); animation: modal-in .2s ease-out; display: flex; flex-direction: column;
-}
-@keyframes modal-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-.modal-head {
-  padding: 20px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between; flex-shrink: 0;
-}
-.modal-head h3 { font-size: 15px; font-weight: 800; color: var(--text-primary); text-transform: uppercase; }
-.modal-close { background: none; border: none; color: var(--text-muted); font-size: 16px; font-weight: 700; padding: 4px; }
-.modal-close:hover { color: var(--text-primary); }
-.modal-body { padding: 20px; flex: 1; overflow-y: auto; }
-.modal-foot { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 12px; background: var(--bg-base); flex-shrink: 0; }
+.modal-backdrop.show { display: flex; animation: backdrop-in .15s ease-out; }
+@keyframes backdrop-in { from { opacity: 0; } to { opacity: 1; } }
 
-.seg-control { display: flex; border: 1px solid var(--border); width: 100%; }
+.modal {
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: 14px;
+  width: 100%; max-width: 500px; max-height: min(88vh, 720px);
+  box-shadow: 0 24px 60px var(--shadow-color);
+  animation: modal-in .22s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex; flex-direction: column;
+  overflow: hidden; /* header/body/footer corners stay clean — .modal-body is the only scroller */
+}
+@keyframes modal-in {
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-head {
+  padding: 18px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0;
+}
+.modal-head h3 {
+  font-size: 14px; font-weight: 800; color: var(--text-primary);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.modal-close {
+  width: 32px; height: 32px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  background: var(--bg-subtle); border: 1px solid var(--border); border-radius: 50%;
+  color: var(--text-secondary); font-size: 14px; font-weight: 700; line-height: 1;
+  transition: background .15s, color .15s, border-color .15s;
+}
+.modal-close:hover { color: var(--text-primary); background: var(--bg-base); border-color: var(--border-strong); }
+
+.modal-body {
+  padding: 20px; flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  min-height: 0; /* required for flex children to actually scroll instead of overflowing the flex box */
+}
+
+.modal-foot {
+  padding: 16px 20px; border-top: 1px solid var(--border);
+  display: flex; justify-content: flex-end; gap: 10px;
+  background: var(--bg-base); flex-shrink: 0;
+}
+.modal-foot .btn { min-width: 100px; }
+
+/* ── Mobile: near-fullscreen bottom sheet instead of a cramped floating card ── */
+@media (max-width: 560px) {
+  .modal-backdrop { padding: 0; align-items: flex-end; }
+  .modal {
+    max-width: 100%; width: 100%; max-height: 92vh;
+    border-radius: 18px 18px 0 0; border-bottom: none;
+    animation: modal-in-mobile .22s cubic-bezier(0.16, 1, 0.3, 1);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+  }
+  @keyframes modal-in-mobile {
+    from { opacity: 0; transform: translateY(100%); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .modal-head { padding: 16px 18px; }
+  .modal-body { padding: 18px; }
+  /* Stacked, full-width, thumb-friendly buttons instead of small
+     side-by-side ones squeezed into a narrow footer. */
+  .modal-foot { flex-direction: column-reverse; padding: 14px 18px; gap: 8px; }
+  .modal-foot .btn { width: 100%; min-width: 0; padding: 13px; }
+  .field-row { flex-direction: column; gap: 0; }
+  .field-row .field { min-width: 0; }
+  .field input, .field select, .field textarea { padding: 12px 14px; font-size: 16px; } /* 16px avoids iOS Safari auto-zoom on focus */
+}
+
+.seg-control { display: flex; border: 1px solid var(--border); width: 100%; border-radius: 9px; overflow: hidden; }
 .seg-control button {
   flex: 1; border: none; background: var(--bg-base); color: var(--text-secondary);
-  font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 10px;
+  font-weight: 700; font-size: 11px; text-transform: uppercase; padding: 11px 10px;
   border-right: 1px solid var(--border); transition: all .15s;
 }
 .seg-control button:last-child { border-right: none; }
 .seg-control button.on { background: var(--text-primary); color: var(--bg-base); }
+@media (max-width: 560px) {
+  .seg-control button { padding: 13px 10px; } /* bigger tap target on touch */
+}
 
 /* ============================================================
    Tables

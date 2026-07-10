@@ -10,6 +10,7 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
   const [timeLimit, setTimeLimit] = useState('');
+  const [hasLogout, setHasLogout] = useState(true);
 
   const [years, setYears] = useState(null);       // null = loading
   const [programs, setPrograms] = useState(null);
@@ -24,6 +25,7 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
     setName('');
     setDate(new Date().toISOString().slice(0, 10));
     setTimeLimit('');
+    setHasLogout(true);
     setYears(null);
     setPrograms(null);
     setDepts(null);
@@ -92,7 +94,7 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
       departments: noDeptFilter ? [] : selectedDepts,
     });
 
-    await onCreate({ name: trimmedName, eventDate: date, loginTimeLimit: timeLimit || null, filterJson });
+    await onCreate({ name: trimmedName, eventDate: date, loginTimeLimit: timeLimit || null, filterJson, hasLogout });
   }
 
   return (
@@ -117,6 +119,17 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
       <div className="field-row">
         <div className="field"><label>Event date</label><input type="date" value={date} onChange={(e) => setDate(e.target.value)} /></div>
         <div className="field"><label>Login cutoff (optional)</label><input type="time" value={timeLimit} onChange={(e) => setTimeLimit(e.target.value)} /></div>
+      </div>
+      <div className="field">
+        <label style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+          <input type="checkbox" checked={hasLogout} onChange={(e) => setHasLogout(e.target.checked)} />
+          Enable logout station
+        </label>
+        <div className="hint" style={{ marginTop: 6 }}>
+          {hasLogout
+            ? 'Students can scan out — attendance requires both login and logout to count as complete.'
+            : 'No logout for this event — a single scan-in is the full attendance record. The Logout option will be greyed out on the scanner, and reports will count everyone who logged in as attended.'}
+        </div>
       </div>
       <div className="field">
         <label>Attendance Scope</label>
