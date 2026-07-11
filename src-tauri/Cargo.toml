@@ -18,7 +18,7 @@ tauri-build = { version = "1", features = [] }
 # It also enables the inspector in --release builds, which is convenient
 # while debugging. Consider removing it before shipping a final release
 # build to customers if you don't want them able to open devtools.
-tauri = { version = "1", features = [ "process-relaunch", "window-unmaximize", "window-minimize", "window-set-fullscreen", "window-hide", "window-close", "window-set-focus", "window-show", "window-start-dragging", "window-maximize", "shell-open", "devtools"] }
+tauri = { version = "1", features = [ "process-relaunch", "window-unmaximize", "window-minimize", "window-set-fullscreen", "window-hide", "window-close", "window-set-focus", "window-show", "window-start-dragging", "window-maximize", "shell-open", "dialog-open", "devtools"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 # Used to wait for the backend's port to open before showing the window,

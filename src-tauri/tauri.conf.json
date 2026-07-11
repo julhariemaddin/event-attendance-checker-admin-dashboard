@@ -17,6 +17,10 @@
         "all": false,
         "open": true
       },
+      "dialog": {
+        "all": false,
+        "open": true
+      },
       "window": {
         "all": false,
         "maximize": true,
@@ -51,7 +55,8 @@
       ],
       "windows": {
         "nsis": {
-          "installMode": "currentUser"
+          "installMode": "currentUser",
+          "installerIcon": "icons/icon.ico"
         }
       }
     },
