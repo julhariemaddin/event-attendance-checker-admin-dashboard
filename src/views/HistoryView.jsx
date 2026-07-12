@@ -102,7 +102,7 @@ export function HistoryView({ expandEventId, onExpandHandled }) {
               <div>
                 <strong>{e.name}</strong>{' '}
                 <span className="mono" style={{ color: 'var(--text-muted)' }}>#{e.id}</span>
-                <div className="mono" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{e.eventDate || '—'}</div>
+ <div className="mono" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{e.eventDate || '-'}</div>
               </div>
               <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isOpen ? '▲ HIDE' : '▼ DETAILS'}</span>
             </button>

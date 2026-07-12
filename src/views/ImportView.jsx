@@ -104,7 +104,7 @@ export function ImportView({ importStatus, onUpload, onDelete }) {
           {result.status === 'VALID' ? (
             <>
               <div className="badge b-green" style={{ marginBottom: 12 }}>VALID</div>
-              <div style={{ fontSize: 14, fontWeight: 700 }}>Imported {result.insertedCount ?? '—'} rows successfully.</div>
+ <div style={{ fontSize: 14, fontWeight: 700 }}>Imported {result.insertedCount ?? '-'} rows successfully.</div>
             </>
           ) : (
             <>
@@ -116,7 +116,7 @@ export function ImportView({ importStatus, onUpload, onDelete }) {
                   <tbody>
                     {result.rowErrors.map((r, i) => (
                       <tr key={i}>
-                        <td className="mono">{r.row ?? r.rowNumber ?? '—'}</td>
+ <td className="mono">{r.row ?? r.rowNumber ?? '-'}</td>
                         <td>{r.message ?? JSON.stringify(r)}</td>
                       </tr>
                     ))}

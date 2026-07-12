@@ -57,7 +57,10 @@
         "nsis": {
           "installMode": "currentUser",
           "installerIcon": "icons/icon.ico"
-        }
+        },
+        "certificateThumbprint": null,
+        "digestAlgorithm": "sha256",
+        "timestampUrl": "http://timestamp.digicert.com"
       }
     },
     "security": {

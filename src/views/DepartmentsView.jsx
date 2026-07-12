@@ -18,7 +18,7 @@ export function DepartmentsView({ departmentTemplates, discoveredDepartments, is
             {departmentTemplates.map((d) => (
               <tr key={d.id}>
                 <td className="mono" style={{ fontWeight: 700 }}>{d.code}</td>
-                <td>{d.name || '—'}</td>
+ <td>{d.name || '-'}</td>
                 <td style={{ textAlign: 'right' }}>
                   <button className="btn small danger" onClick={() => onDeleteTemplateClick(d.id, d.code)}>DELETE</button>
                 </td>
@@ -46,7 +46,7 @@ export function DepartmentsView({ departmentTemplates, discoveredDepartments, is
         </table>
         {discoveredDepartments.length === 0 && (
           <div className="empty-state" style={{ border: 'none' }}>
-            <div className="et">{isV2 ? 'No departments discovered yet' : 'Not applicable — active profile is V1'}</div>
+ <div className="et">{isV2 ? 'No departments discovered yet' : 'Not applicable - active profile is V1'}</div>
             <div className="ed">These appear automatically the first time an import file mentions a new department code.</div>
           </div>
         )}

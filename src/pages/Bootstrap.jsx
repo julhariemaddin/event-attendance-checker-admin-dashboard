@@ -66,7 +66,7 @@ export default function Bootstrap({ onDone }) {
         const selected = await tauriOpenDialog({ directory: true, multiple: false });
         if (selected) {
           setPath(selected);
-          submit(selected); // auto-submit — full path already known
+ submit(selected); // auto-submit - full path already known
         }
         return;
       }
@@ -209,8 +209,8 @@ export default function Bootstrap({ onDone }) {
                   fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.6,
                 }}>
                   {typeof tauriOpenDialog === 'function'
-                    ? 'Pick a folder — the full path is filled in and saved automatically.'
-                    : "Browsers only expose the selected folder's name, not its full path — after picking, confirm or complete the full path above."}
+ ? 'Pick a folder - the full path is filled in and saved automatically.'
+ : "Browsers only expose the selected folder's name, not its full path - after picking, confirm or complete the full path above."}
                 </div>
               )}
             </div>
@@ -279,7 +279,7 @@ export default function Bootstrap({ onDone }) {
               border: '1px solid rgba(234,179,8,.2)',
             }}>
               ⚠ The ASEADO backend must restart to apply the new workspace.
-              This can't be skipped — the app will restart automatically.
+ This can't be skipped - the app will restart automatically.
             </div>
 
             <div style={{

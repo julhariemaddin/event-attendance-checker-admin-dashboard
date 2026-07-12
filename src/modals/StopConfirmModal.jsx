@@ -44,7 +44,7 @@ export function StopConfirmModal({ show, onClose, onConfirm, loading }) {
           margin: 0, fontSize: 12, color: 'var(--text-muted)',
           fontStyle: 'italic',
         }}>
-          Generating reports — this may take a few seconds, please don't close the app.
+ Generating reports - this may take a few seconds, please don't close the app.
         </p>
       )}
     </Modal>

@@ -210,7 +210,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
                       <div style={{ padding: '4px 6px 14px' }}>
                         {program.truncated && (
                           <div style={{ margin: '0 0 10px', fontSize: 12, color: 'var(--text-muted)' }}>
-                            Showing the first {program.yearBlocks.reduce((n, b) => n + b.rows.length, 0)} of {program.count} in this program — narrow your search to see the rest.
+ Showing the first {program.yearBlocks.reduce((n, b) => n + b.rows.length, 0)} of {program.count} in this program - narrow your search to see the rest.
                           </div>
                         )}
                         {program.yearBlocks.map((yb, yi) => (

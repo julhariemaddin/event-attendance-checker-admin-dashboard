@@ -112,13 +112,13 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
           <label>Year</label>
           <select value={year} onChange={(e) => setYear(e.target.value)}>
             <option value="">
-              {yearOptions === null ? 'Loading...' : yearOptions === 'error' || (Array.isArray(yearOptions) && yearOptions.length === 0) ? 'No years yet — import a file first' : 'Select a year...'}
+ {yearOptions === null ? 'Loading...' : yearOptions === 'error' || (Array.isArray(yearOptions) && yearOptions.length === 0) ? 'No years yet - import a file first' : 'Select a year...'}
             </option>
             {Array.isArray(yearOptions) && yearOptions.map((y) => (
               <option key={y} value={y}>{y}</option>
             ))}
             {/* Edit mode may have a year value that isn't in the discovered
-                list yet (e.g. the roster was later trimmed) — keep it
+ list yet (e.g. the roster was later trimmed) - keep it
                 selectable so editing doesn't silently blank a valid field. */}
             {isEdit && year && Array.isArray(yearOptions) && !yearOptions.includes(year) && (
               <option value={year}>{year}</option>
@@ -130,7 +130,7 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
         <label>Program</label>
         <select value={program} onChange={(e) => setProgram(e.target.value)}>
           <option value="">
-            {programOptions === null ? 'Select a program...' : programOptions === 'error' ? 'No programs yet — import a file first' : 'Select a program...'}
+ {programOptions === null ? 'Select a program...' : programOptions === 'error' ? 'No programs yet - import a file first' : 'Select a program...'}
           </option>
           {Array.isArray(programOptions) && programOptions.map((p) => (
             <option key={p.name} value={p.name}>{p.name}</option>

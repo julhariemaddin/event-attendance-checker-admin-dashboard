@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Modal } from '../components/Modal.jsx';
 import { api } from '../api/client.js';
 
@@ -7,10 +7,19 @@ import { api } from '../api/client.js';
 // checked" behavior and the noYearFilter/noProgramFilter/noDeptFilter ->
 // filterJson-or-null logic exactly.
 //
-// EDIT: restructured into clearly separated sections (basic info / logout
-// station / attendance scope) instead of one undifferentiated wall of
-// fields, and the year/program/department lists became compact toggle
-// pills with All/None shortcuts instead of long columns of checkbox rows.
+// PERF: PillGroup is memoized, and every callback/getter passed to it is
+// wrapped in useCallback/useMemo below. Without that, typing a single
+// character in the Event Name field re-rendered the ENTIRE modal tree on
+// every keystroke — including every year/program/department pill (each
+// with a freshly recreated inline style object) — because the inline
+// arrow functions previously passed as props (onToggle, getKey, getLabel,
+// onAll, onNone) were new references every render, which defeats memo
+// even when the actual pill data hasn't changed at all. That was the
+// entire source of the lag; the pill lists themselves were never the
+// problem.
+
+const identity = (v) => v;
+const programCode = (p) => p.code;
 
 function SectionCard({ title, subtitle, children }) {
   return (
@@ -28,15 +37,32 @@ function SectionCard({ title, subtitle, children }) {
   );
 }
 
-function PillGroup({ label, status, items, getKey, getLabel, selected, onToggle, onAll, onNone, emptyHint }) {
+const Pill = memo(function Pill({ label, on, onClick }) {
+  return (
+    <button
+      type="button" onClick={onClick}
+      style={{
+        padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600,
+        border: '1px solid ' + (on ? 'var(--primary, #3b82f6)' : 'var(--border)'),
+        background: on ? 'var(--primary, #3b82f6)' : 'var(--bg-base)',
+        color: on ? '#fff' : 'var(--text-secondary)',
+        transition: 'all .12s',
+      }}
+    >
+      {label}
+    </button>
+  );
+});
+
+const PillGroup = memo(function PillGroup({ label, status, items, getKey, getLabel, selected, onToggle, onAll, onNone, emptyHint }) {
   const allOn = items.length > 0 && selected.length === items.length;
   return (
     <div style={{ marginBottom: 4 }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
         <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>
           {label}
-          {status === 'loading' && <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> — loading…</span>}
-          {status === 'error' && <span style={{ color: 'var(--accent-red, #b91c1c)', fontWeight: 400 }}> — failed to load</span>}
+          {status === 'loading' && <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> loading…</span>}
+          {status === 'error' && <span style={{ color: 'var(--accent-red, #b91c1c)', fontWeight: 400 }}> failed to load</span>}
         </div>
         {items.length > 0 && (
           <div style={{ display: 'flex', gap: 8, fontSize: 11 }}>
@@ -60,26 +86,14 @@ function PillGroup({ label, status, items, getKey, getLabel, selected, onToggle,
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
         {items.map((item) => {
           const key = getKey(item);
-          const on = selected.includes(key);
           return (
-            <button
-              type="button" key={key} onClick={() => onToggle(key)}
-              style={{
-                padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-                border: '1px solid ' + (on ? 'var(--primary, #3b82f6)' : 'var(--border)'),
-                background: on ? 'var(--primary, #3b82f6)' : 'var(--bg-base)',
-                color: on ? '#fff' : 'var(--text-secondary)',
-                transition: 'all .12s',
-              }}
-            >
-              {getLabel(item)}
-            </button>
+            <Pill key={key} label={getLabel(item)} on={selected.includes(key)} onClick={() => onToggle(key)} />
           );
         })}
       </div>
     </div>
   );
-}
+});
 
 export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
   const [name, setName] = useState('');
@@ -140,10 +154,6 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
     }
   }, [show, isV2]);
 
-  function toggle(list, setList, value) {
-    setList(list.includes(value) ? list.filter((v) => v !== value) : [...list, value]);
-  }
-
   // Mirrors the backend guard in EventService.createEvent — an event with
   // nobody on the roster would reject every scan as unrecognized, so block
   // it here too instead of only finding out after a failed submit.
@@ -178,6 +188,29 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
   const programItems = Array.isArray(programs) ? programs : [];
   const deptItems = Array.isArray(depts) ? depts : [];
 
+  // Stable callback identities — this is the actual fix. Without
+  // useCallback, each of these was a brand-new function on every render
+  // (including every keystroke in the Name field above), which forced
+  // React to treat PillGroup's props as "changed" and re-render every
+  // single pill even though the underlying data never moved.
+  const toggleYear = useCallback((y) => {
+    setSelectedYears((prev) => (prev.includes(y) ? prev.filter((v) => v !== y) : [...prev, y]));
+  }, []);
+  const allYearsCb = useCallback(() => setSelectedYears(yearItems), [yearItems]);
+  const noneYearsCb = useCallback(() => setSelectedYears([]), []);
+
+  const toggleProgram = useCallback((code) => {
+    setSelectedPrograms((prev) => (prev.includes(code) ? prev.filter((v) => v !== code) : [...prev, code]));
+  }, []);
+  const allProgramsCb = useCallback(() => setSelectedPrograms(programItems.map((p) => p.code)), [programItems]);
+  const noneProgramsCb = useCallback(() => setSelectedPrograms([]), []);
+
+  const toggleDept = useCallback((code) => {
+    setSelectedDepts((prev) => (prev.includes(code) ? prev.filter((v) => v !== code) : [...prev, code]));
+  }, []);
+  const allDeptsCb = useCallback(() => setSelectedDepts(deptItems), [deptItems]);
+  const noneDeptsCb = useCallback(() => setSelectedDepts([]), []);
+
   return (
     <Modal show={show} onClose={onClose} title="New event" footer={(
       <>
@@ -190,7 +223,7 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
           marginBottom: 16, padding: '10px 12px', borderRadius: 8,
           background: 'var(--accent-red-tint, #fdecea)', color: 'var(--accent-red, #b91c1c)', fontSize: 13,
         }}>
-          No students in this profile's roster yet — import a roster first. An event can't be created until there's someone to check in.
+          No students in this profile's roster yet. Import a roster first. An event can't be created until there's someone to check in.
         </div>
       )}
 
@@ -212,41 +245,41 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
         </label>
         <div className="hint" style={{ marginTop: 8 }}>
           {hasLogout
-            ? 'Students can scan out — attendance requires both login and logout to count as complete.'
-            : 'No logout for this event — a single scan-in is the full attendance record. The Logout option will be greyed out on the scanner, and reports will count everyone who logged in as attended.'}
+            ? 'Students can scan out. Attendance requires both login and logout to count as complete.'
+            : "No logout for this event. A single scan-in is the full attendance record. The Logout option will be greyed out on the scanner, and reports will count everyone who logged in as attended."}
         </div>
       </SectionCard>
 
-      <SectionCard title="Attendance Scope" subtitle="Everything is included by default — tap to exclude specific groups.">
+      <SectionCard title="Attendance Scope" subtitle="Everything is included by default. Tap to exclude specific groups.">
         <PillGroup
           label="YEAR LEVELS" status={yearStatus} items={yearItems}
-          getKey={(y) => y} getLabel={(y) => y}
+          getKey={identity} getLabel={identity}
           selected={selectedYears}
-          onToggle={(y) => toggle(selectedYears, setSelectedYears, y)}
-          onAll={() => setSelectedYears(yearItems)}
-          onNone={() => setSelectedYears([])}
-          emptyHint="No year data yet — import a roster first."
+          onToggle={toggleYear}
+          onAll={allYearsCb}
+          onNone={noneYearsCb}
+          emptyHint="No year data yet. Import a roster first."
         />
         <div style={{ height: 14 }} />
         <PillGroup
           label="PROGRAMS" status={programStatus} items={programItems}
-          getKey={(p) => p.code} getLabel={(p) => p.code}
+          getKey={programCode} getLabel={programCode}
           selected={selectedPrograms}
-          onToggle={(code) => toggle(selectedPrograms, setSelectedPrograms, code)}
-          onAll={() => setSelectedPrograms(programItems.map((p) => p.code))}
-          onNone={() => setSelectedPrograms([])}
-          emptyHint="No programs yet — import a roster first."
+          onToggle={toggleProgram}
+          onAll={allProgramsCb}
+          onNone={noneProgramsCb}
+          emptyHint="No programs yet. Import a roster first."
         />
         {isV2 && deptItems.length > 0 && (
           <>
             <div style={{ height: 14 }} />
             <PillGroup
               label="DEPARTMENTS" status="ready" items={deptItems}
-              getKey={(code) => code} getLabel={(code) => code}
+              getKey={identity} getLabel={identity}
               selected={selectedDepts}
-              onToggle={(code) => toggle(selectedDepts, setSelectedDepts, code)}
-              onAll={() => setSelectedDepts(deptItems)}
-              onNone={() => setSelectedDepts([])}
+              onToggle={toggleDept}
+              onAll={allDeptsCb}
+              onNone={noneDeptsCb}
               emptyHint=""
             />
           </>

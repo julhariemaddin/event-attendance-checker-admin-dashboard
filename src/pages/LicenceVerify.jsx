@@ -103,7 +103,7 @@ export default function LicenceVerify({ onApproved }) {
         }}>LICENCE ACTIVATION</div>
       </motion.div>
 
-      {/* ── SAVED MODE — shows info, option to continue or replace ── */}
+ {/* ── SAVED MODE - shows info, option to continue or replace ── */}
       {mode === 'saved' && info && (
         <motion.div
           initial={{ opacity: 0, y: 16, scale: 0.98 }}
@@ -195,7 +195,7 @@ export default function LicenceVerify({ onApproved }) {
         </motion.div>
       )}
 
-      {/* ── ENTER MODE — paste + verify ── */}
+ {/* ── ENTER MODE - paste + verify ── */}
       {mode === 'enter' && (
         <motion.div
           initial={{ opacity: 0, y: 16, scale: 0.98 }}
@@ -252,7 +252,7 @@ export default function LicenceVerify({ onApproved }) {
                 }}>
                   {isChecking ? 'VERIFYING…' : 'ACTIVATE LICENCE'}
                 </button>
-                {/* Back button — only when replacing an existing key */}
+ {/* Back button - only when replacing an existing key */}
                 {localStorage.getItem('aseado_licence_key_v1') && (
                   <button onClick={() => setMode('saved')} style={{
                     padding: '14px 18px', background: 'transparent',
@@ -279,7 +279,7 @@ export default function LicenceVerify({ onApproved }) {
                 }} />
                 <span style={{
                   fontSize: 11, fontWeight: 800, letterSpacing: '.1em', color: '#22c55e',
-                }}>LICENCE VALID — KEY SAVED</span>
+ }}>LICENCE VALID - KEY SAVED</span>
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -332,7 +332,7 @@ export default function LicenceVerify({ onApproved }) {
 }
 
 function formatExpiry(raw) {
-  if (!raw) return '—';
+ if (!raw) return '-';
   try {
     return new Date(raw).toLocaleDateString('en-PH', {
       year: 'numeric', month: 'long', day: 'numeric',

@@ -65,7 +65,7 @@ export function MonitorView({
   useEffect(() => {
     if (showCutoffBanner && firedRef.current !== selectedEventId) {
       firedRef.current = selectedEventId;
-      toast('Late cutoff reached — new logins are now marked LATE', 'warn');
+ toast('Late cutoff reached - new logins are now marked LATE', 'warn');
     }
     if (!showCutoffBanner && ev && ev.status !== 'RUNNING') {
       firedRef.current = null;
@@ -73,7 +73,7 @@ export function MonitorView({
   }, [showCutoffBanner, selectedEventId]);
 
   // Scan rate bar
-  let ratePct = 0, rateLabel = total + ' scanned', rateHint = 'Enrolled count unavailable — check event filter or roster.', rateColor = 'var(--accent-green, #1e7d4e)';
+ let ratePct = 0, rateLabel = total + ' scanned', rateHint = 'Enrolled count unavailable - check event filter or roster.', rateColor = 'var(--accent-green, #1e7d4e)';
   if (enrolledCount != null && enrolledCount > 0) {
     ratePct = Math.min(100, Math.round((total / enrolledCount) * 100));
     rateLabel = total + ' / ' + enrolledCount;
@@ -102,8 +102,8 @@ export function MonitorView({
   function sendManual() {
     const id = manualId.trim();
     if (!selectedEventId) return toast('Select an event first.', 'err');
-    if (ev?.status === 'PAUSED') return toast('Event is paused — resume it first.', 'err');
-    if (noLogout && manualStation === 'LOGOUT') return toast('This event has no logout station — login only.', 'err');
+ if (ev?.status === 'PAUSED') return toast('Event is paused - resume it first.', 'err');
+ if (noLogout && manualStation === 'LOGOUT') return toast('This event has no logout station - login only.', 'err');
     if (!id) return toast('Enter a student ID.', 'err');
     if (!wsConnected) return toast('Scanner link is not connected.', 'err');
     onSendManualScan({ eventId: selectedEventId, studentId: id, station: manualStation });
@@ -128,7 +128,7 @@ export function MonitorView({
             {events
               .filter((e) => e.status === 'RUNNING' || e.status === 'PAUSED')
               .map((e) => (
-                <option key={e.id} value={e.id}>{e.name} — {e.eventDate} ({e.status})</option>
+ <option key={e.id} value={e.id}>{e.name} - {e.eventDate} ({e.status})</option>
               ))}
           </select>
           <button className="btn" onClick={onRefresh}>REFRESH</button>
@@ -148,7 +148,7 @@ export function MonitorView({
             <div className="side-label" style={{ marginBottom: 12 }}>MANUAL SCAN</div>
             {isPaused && (
               <div style={{ marginBottom: 12, fontSize: 12, color: 'var(--accent-amber, #d35400)' }}>
-                Event is paused — resume it to accept scans again. Existing records below are still visible.
+ Event is paused - resume it to accept scans again. Existing records below are still visible.
               </div>
             )}
             <div className="manual-scan-row">
@@ -197,7 +197,7 @@ export function MonitorView({
 
           {showCutoffBanner && (
             <div style={{ display: 'block', background: 'var(--accent-amber, #d35400)', color: '#fff', padding: '10px 18px', fontSize: 12, fontWeight: 700, letterSpacing: '.08em', marginBottom: 16 }}>
-              ⏰ LATE CUTOFF PASSED — New logins are now marked LATE
+ ⏰ LATE CUTOFF PASSED - New logins are now marked LATE
             </div>
           )}
 
@@ -236,7 +236,7 @@ export function MonitorView({
               <div className="panel-head">
                 <strong>Live feed</strong>
                 <span className={'badge ' + (ev?.status === 'RUNNING' ? 'b-green' : ev?.status === 'PAUSED' ? 'b-amber' : 'b-grey')}>
-                  {ev ? ev.status : '—'}
+ {ev ? ev.status : '-'}
                 </span>
               </div>
               <div style={{ maxHeight: 500, overflowY: 'auto' }}>
@@ -252,9 +252,9 @@ export function MonitorView({
                       badge = f.station === 'LOGIN' ? 'b-green' : 'b-grey';
                       label = (f.firstname || f.lastname) ? `${f.firstname || ''} ${f.lastname || ''}`.trim() : f.studentId;
                     } else if (f.outcome === 'NEEDS_MANUAL_ENTRY') {
-                      badge = 'b-amber'; label = 'Unknown ID — ' + f.studentId;
+ badge = 'b-amber'; label = 'Unknown ID - ' + f.studentId;
                     } else {
-                      badge = 'b-red'; label = (f.reason || 'Rejected') + ' — ' + f.studentId;
+ badge = 'b-red'; label = (f.reason || 'Rejected') + ' - ' + f.studentId;
                     }
                     return (
                       <div className="feed-row" key={i}>

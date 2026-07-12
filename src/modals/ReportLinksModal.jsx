@@ -7,7 +7,7 @@ export function ReportLinksModal({ show, onClose, files, onDownload }) {
       <button className="btn" onClick={onClose}>CLOSE</button>
     )} bodyStyle={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {files.map((f, i) => {
-        const label = (f.departmentLabel ? f.departmentLabel + ' — ' : '') + f.fileType.toUpperCase();
+ const label = (f.departmentLabel ? f.departmentLabel + ' - ' : '') + f.fileType.toUpperCase();
         return (
           <button
             key={i}

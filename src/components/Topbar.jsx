@@ -41,7 +41,7 @@ export function Topbar({ profileName, serverUp, wsConnected, onMobileMenuClick, 
           <span>{'SCANNER LINK: ' + (wsConnected ? 'LIVE' : 'DISCONNECTED')}</span>
         </div>
       </div>
-      {/* Desktop-only — on mobile this same action lives inside the sidebar
+ {/* Desktop-only - on mobile this same action lives inside the sidebar
           so there is never more than one menu-related button visible. */}
       {onBack && (
         <button className="topbar-back-btn" onClick={onBack}>

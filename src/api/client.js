@@ -46,7 +46,7 @@ export async function api(method, path, body) {
     res = await fetch(API_BASE + path, opts);
   } catch (err) {
     if (serverStatusListener) serverStatusListener(false);
-    throw new ApiError('Could not reach server. If this persists, the local HTTPS certificate may not be trusted yet — see README-BUILD.md.');
+ throw new ApiError('Could not reach server. If this persists, the local HTTPS certificate may not be trusted yet - see README-BUILD.md.');
   }
 
   if (serverStatusListener) serverStatusListener(true);

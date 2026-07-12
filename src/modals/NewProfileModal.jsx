@@ -62,12 +62,12 @@ export function NewProfileModal({ show, onClose, departmentTemplates, onCreate, 
           <label>Department</label>
           {departmentTemplates.length === 0 ? (
             <div className="hint" style={{ padding: '10px 0' }}>
-              No department templates yet — clicking "CREATE DEPARTMENT" will take you to the Departments tab.
+ No department templates yet - clicking "CREATE DEPARTMENT" will take you to the Departments tab.
             </div>
           ) : (
             <select value={deptId} onChange={(e) => setDeptId(e.target.value)}>
               {departmentTemplates.map((d) => (
-                <option key={d.id} value={d.id}>{d.code} — {d.name || ''}</option>
+ <option key={d.id} value={d.id}>{d.code} - {d.name || ''}</option>
               ))}
             </select>
           )}

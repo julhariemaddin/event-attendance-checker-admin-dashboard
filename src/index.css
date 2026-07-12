@@ -61,6 +61,19 @@ body {
   -webkit-font-smoothing: antialiased;
   transition: background-color .25s ease, color .25s ease;
   position: relative;
+  /* No accidental blue drag-highlight across the UI while clicking around —
+     this is an operations console, not a document; text isn't meant to be
+     selected outside of actual data-entry fields. */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* ...but typing, selecting, and copy/pasting inside real form fields must
+   keep working normally — the rule above only removes accidental
+   drag-select on buttons/labels/cards, not genuine text input. */
+input, textarea, [contenteditable="true"] {
+  user-select: text;
+  -webkit-user-select: text;
 }
 
 /* Fine, static grain overlay — the signature texture that keeps the

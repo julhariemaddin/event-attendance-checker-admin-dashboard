@@ -12,7 +12,7 @@ export function EventsView({ events, onNewEvent, onMonitor, onHistory, onReports
       <div className="view-header">
         <div>
           <div className="view-title">Events</div>
-          <div className="view-desc">Each event is one login/logout session window — create one before scanning starts.</div>
+ <div className="view-desc">Each event is one login/logout session window - create one before scanning starts.</div>
         </div>
         <button className="btn primary" onClick={onNewEvent}>NEW EVENT</button>
       </div>
@@ -25,8 +25,8 @@ export function EventsView({ events, onNewEvent, onMonitor, onHistory, onReports
             {events.map((e) => (
               <tr key={e.id}>
                 <td><strong>{e.name}</strong> <span className="mono" style={{ color: 'var(--text-muted)' }}>#{e.id}</span></td>
-                <td className="mono">{e.eventDate || '—'}</td>
-                <td className="mono">{e.loginTimeLimit || '—'}</td>
+ <td className="mono">{e.eventDate || '-'}</td>
+ <td className="mono">{e.loginTimeLimit || '-'}</td>
                 <td><StatusBadge status={e.status} /></td>
                 <td>
                   <div className="row-actions">

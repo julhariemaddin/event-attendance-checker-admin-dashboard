@@ -42,7 +42,7 @@ export function Sidebar({
     <>
       <div id="sidebar" className={open ? 'open' : ''}>
 
-        {/* Back-to-menu — only rendered (and only visible via CSS) on mobile,
+ {/* Back-to-menu - only rendered (and only visible via CSS) on mobile,
             right at the top of the drawer, so there's a single obvious
             menu control instead of two competing ones. */}
         {onBack && (
@@ -119,7 +119,7 @@ export function Sidebar({
         <div className="side-section" style={{ paddingTop: 10 }}>
           <div className="side-label">WORKSPACE</div>
 
-          {/* No-profile banner — shown when profile is required */}
+ {/* No-profile banner - shown when profile is required */}
           {!hasProfile && (
             <div style={{
               margin: '4px 0 10px',
@@ -151,7 +151,7 @@ export function Sidebar({
               >
                 <Icon size={15} strokeWidth={isActive ? 2.4 : 2} className="nav-btn-icon" />
                 <span>{item.label}</span>
-                {disabled && <span className="nav-btn-locked">—</span>}
+ {disabled && <span className="nav-btn-locked"> - </span>}
               </button>
             );
           })}
@@ -178,7 +178,7 @@ export function Sidebar({
         </div>
       </div>
 
-      {/* Backdrop — tapping it closes the mobile drawer */}
+ {/* Backdrop - tapping it closes the mobile drawer */}
       <div
         className={'sidebar-backdrop' + (open ? ' show' : '')}
         onClick={onClose}

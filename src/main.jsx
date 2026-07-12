@@ -115,7 +115,7 @@ function Root() {
     // Wait for backend to be reachable (critical for EXE cold-start)
     const up = await waitForBackend(msg => setResolveMsg(msg));
     if (!up) {
-      setResolveMsg('Backend unreachable — retrying…');
+ setResolveMsg('Backend unreachable - retrying…');
       // Keep showing resolving; user will see the backend-down state in the app
     }
 
@@ -180,16 +180,42 @@ function Root() {
 
   useEffect(() => {
     window.addEventListener('aseado:logout', logout);
+
+    // DevTools shortcuts — the real fix is removing the "devtools" Cargo
+    // feature in src-tauri/Cargo.toml (that's what actually compiles the
+    // inspector out of release builds). This is defense-in-depth on top of
+    // that, in case some webview environment still honors these bindings
+    // at the OS level regardless of the Rust-side flag.
     function onKeyDown(e) {
       if (e.key === 'F11') {
         e.preventDefault();
         toggleFullscreen();
+        return;
+      }
+      const blockedCombo =
+        e.key === 'F12' ||
+        ((e.ctrlKey || e.metaKey) && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].includes(e.key)) ||
+        ((e.ctrlKey || e.metaKey) && ['U', 'u'].includes(e.key));
+      if (blockedCombo) {
+        e.preventDefault();
+        e.stopPropagation();
       }
     }
+    // Right-click -> "Inspect Element" is the other common path in; blocked
+    // everywhere except form fields, where a normal right-click paste/copy
+    // menu is still genuinely useful.
+    function onContextMenu(e) {
+      const tag = e.target.tagName;
+      const isFormField = tag === 'INPUT' || tag === 'TEXTAREA' || e.target.isContentEditable;
+      if (!isFormField) e.preventDefault();
+    }
+
     window.addEventListener('keydown', onKeyDown);
+    window.addEventListener('contextmenu', onContextMenu);
     return () => {
       window.removeEventListener('aseado:logout', logout);
       window.removeEventListener('keydown', onKeyDown);
+      window.removeEventListener('contextmenu', onContextMenu);
     };
   }, []);
 

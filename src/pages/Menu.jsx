@@ -20,7 +20,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
   const [navOpen,     setNavOpen]     = useState(false);
   const [panel,       setPanel]       = useState('dashboard');
   const [server,      setServer]      = useState(null);
-  const [workspace,   setWorkspace]   = useState('—');
+ const [workspace, setWorkspace] = useState('-');
   const [copied,      setCopied]      = useState(false);
   const [licenceInfo, setLicenceInfo] = useState(null); // { subject, username, expiration }
 
@@ -33,7 +33,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then(r => r.json())
-      .then(d => { setServer(true); setWorkspace(d.rootPath || '—'); })
+ .then(d => { setServer(true); setWorkspace(d.rootPath || '-'); })
       .catch(() => setServer(false));
 
     try {
@@ -55,10 +55,10 @@ export default function Menu({ onOpenAdmin, onLogout }) {
     setTimeout(() => setCopied(false), 1800);
   }
 
-  // Parse "JULHARIE MADDIN - GOV" → { name: "Julharie Maddin", tag: "GOV" }
+  // Parse "JULHARIE MADDIN — GOV" → { name: "Julharie Maddin", tag: "GOV" }
   function parseSubject(subject) {
     if (!subject) return { name: null, tag: null };
-    const parts = subject.split(' - ');
+    const parts = subject.split(' — '); // NOTE: em dash is the real delimiter used by the licence-issuing tool — do not change to a plain hyphen
     const name = parts[0]
       ? parts[0].trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
       : null;
@@ -70,9 +70,9 @@ export default function Menu({ onOpenAdmin, onLogout }) {
 
   const serverColor = server === null ? 'var(--text-muted)' : server ? 'var(--status-live)' : '#ef4444';
   const serverLabel = server === null ? 'CHECKING…' : server ? 'RUNNING' : 'ERROR';
-  const workspaceShort = workspace !== '—'
+ const workspaceShort = workspace !== '-'
     ? (workspace.split(/[\\/]/).pop() || workspace)
-    : '—';
+ : '-';
 
   const initial = (licenceName || 'A').trim().charAt(0).toUpperCase();
 
@@ -165,7 +165,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
           borderRight: '1px solid var(--border)',
           display: 'flex', flexDirection: 'column', overflowY: 'auto',
         }}>
-          {/* Welcome block — compact, just avatar + name + tag */}
+ {/* Welcome block - compact, just avatar + name + tag */}
           {licenceName && (
             <div style={{
               padding: '20px 18px 16px',
@@ -280,11 +280,11 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                             fontSize: 11, fontWeight: 700,
                             color: 'var(--text-muted)',
                             marginLeft: 12, letterSpacing: '.1em',
-                          }}>— {licenceTag}</span>
+ }}> - {licenceTag}</span>
                         )}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 6 }}>
-                        Fast, Simple &amp; Secure — your event is ready when you are.
+ Fast, Simple &amp; Secure - your event is ready when you are.
                       </div>
                     </div>
                     <span style={{
@@ -401,15 +401,15 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                     fontSize: 10, color: 'var(--text-muted)',
                     letterSpacing: '.08em', marginBottom: 22,
                   }}>
-                    EVENT ATTENDANCE CHECKER — DESKTOP EDITION
+ EVENT ATTENDANCE CHECKER - DESKTOP EDITION
                   </div>
                   <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0 0 20px' }} />
                   {[
                     ['VERSION',       '1.0.0'],
                     ['STACK',         'Spring Boot 4.1.0 · SQLite · React (Vite) · Tauri · Liberica JDK 21'],
                     ['ARCHITECTURE',  'Fully offline desktop. QR/barcode scanning over LAN via WebSocket.'],
-                    ['LICENCE',       licenceInfo ? `${licenceInfo.subject}` : '—'],
-                    ['EXPIRES',       licenceInfo ? formatExpiry(licenceInfo.expiration) : '—'],
+ ['LICENCE', licenceInfo ? `${licenceInfo.subject}` : '-'],
+ ['EXPIRES', licenceInfo ? formatExpiry(licenceInfo.expiration) : '-'],
                   ].map(([l, v]) => (
                     <div key={l} style={{ marginBottom: 16 }}>
                       <div style={{
@@ -439,7 +439,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                   {[
                     ['NAME',         'Julharie Maddin'],
                     ['ROLE',         'Systems Developer'],
-                    ['INSTITUTION',  'Jose Rizal Memorial State University — Siocon Campus'],
+ ['INSTITUTION', 'Jose Rizal Memorial State University - Siocon Campus'],
                     ['PROGRAMME',    'BS Computer Science'],
                     ['CERTIFICATION','NC II · Computer Systems Servicing (2025)'],
                     ['ORCID',        '0009-0009-3366-1271'],
@@ -486,7 +486,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
             {/* ── SETTINGS ───────────────────────────────────── */}
             {panel === 'settings' && (
               <motion.div key="settings" {...panelMotion}>
-                <PanelHeader title="Settings" desc="Runtime configuration — read-only." />
+ <PanelHeader title="Settings" desc="Runtime configuration - read-only." />
 
                 <div style={{
                   maxWidth: 540, background: 'var(--bg-surface)',
@@ -497,9 +497,9 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                     ['Server port',       '8080',           'Spring Boot HTTP + WebSocket (scanner, API).'],
                     ['Admin access',      'JWT-protected',  'Token issued after login, stored in sessionStorage.'],
                     ['Scanner URL',       scannerUrl,       'Accessible from any device on the same LAN.'],
-                    ['Scanner access',    'Open (no auth)', 'Phone browser needs no login — scans via WebSocket.'],
-                    ['Licence subject',   licenceInfo?.subject || '—',  'From the active licence key.'],
-                    ['Licence username',  licenceInfo?.username || '—', 'Admin credentials embedded in the licence.'],
+ ['Scanner access', 'Open (no auth)', 'Phone browser needs no login - scans via WebSocket.'],
+ ['Licence subject', licenceInfo?.subject || '-', 'From the active licence key.'],
+ ['Licence username', licenceInfo?.username || '-', 'Admin credentials embedded in the licence.'],
                   ].map(([k, v, hint], i, arr) => (
                     <div key={k} style={{ padding: '14px 0', borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--border)' }}>
                       <div style={{
@@ -585,7 +585,7 @@ function ActionCard({ title, desc, onClick, accent, icon }) {
 }
 
 function formatExpiry(raw) {
-  if (!raw) return '—';
+ if (!raw) return '-';
   try {
     return new Date(raw).toLocaleDateString('en-PH', {
       year: 'numeric', month: 'long', day: 'numeric',

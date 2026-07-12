@@ -379,7 +379,7 @@ async function handleStopConfirm() {
     const res = await api('POST', `/api/events/${selectedEventId}/stop`);
     setModal(null);
     const count = res.reportPaths?.length ?? 0;
-    toast(`Event stopped — ${count} report${count !== 1 ? 's' : ''} generated`, 'ok');
+ toast(`Event stopped - ${count} report${count !== 1 ? 's' : ''} generated`, 'ok');
     await loadEvents();
     // A stopped event no longer belongs in Live Monitor — it's an Events/
     // History concern now. Without this, the dropdown goes blank (its
