@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { api, API_BASE } from '../api/client.js';
+import { StudentStandingModal } from '../modals/StudentStandingModal.jsx';
 
 // Per-student attendance standing across every STOPPED event, honoring
 // each event's own filter (an event's filter not matching a student
@@ -39,7 +40,7 @@ export function StandingView({ isV2, toast }) {
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
   const [collapsed, setCollapsed] = useState({});
-  const [savingId, setSavingId] = useState(null);
+  const [selectedStudent, setSelectedStudent] = useState(null);
   const [exporting, setExporting] = useState(false);
 
   useEffect(() => {
@@ -59,16 +60,9 @@ export function StandingView({ isV2, toast }) {
     }
   }
 
-  async function toggleCleared(studentId, current) {
-    setSavingId(studentId);
-    try {
-      await api('POST', '/api/analytics/clearance/' + encodeURIComponent(studentId), { cleared: !current });
-      setRows((prev) => prev.map((r) => (r.studentId === studentId ? { ...r, cleared: !current } : r)));
-    } catch (_) {
-      // row just won't flip — user can retry
-    } finally {
-      setSavingId(null);
-    }
+  async function setClearance(studentId, cleared, reason) {
+    await api('POST', '/api/analytics/clearance/' + encodeURIComponent(studentId), { cleared, reason });
+    setRows((prev) => prev.map((r) => (r.studentId === studentId ? { ...r, cleared, reason } : r)));
   }
 
   async function handleExport() {
@@ -191,7 +185,7 @@ export function StandingView({ isV2, toast }) {
             </button>
 
             {!isCollapsed && group.students.map((r) => (
-              <div key={r.studentId} className="standing-row">
+              <div key={r.studentId} className="standing-row" style={{ cursor: 'pointer' }} onClick={() => setSelectedStudent(r)}>
                 <span className="standing-row-id">{r.studentId}</span>
                 <span className="standing-row-name">{r.lastname}, {r.firstname}</span>
                 <span className="standing-row-count">
@@ -203,18 +197,20 @@ export function StandingView({ isV2, toast }) {
                 <span className="standing-row-pct">
                   {r.eligibleEvents === 0 ? '—' : `${Math.round(r.attendanceRate)}%`}
                 </span>
-                <button
-                  className={'standing-clear-btn' + (r.cleared ? ' cleared' : '')}
-                  disabled={savingId === r.studentId}
-                  onClick={() => toggleCleared(r.studentId, r.cleared)}
-                >
+                <span className={'standing-clear-badge' + (r.cleared ? ' cleared' : '')}>
                   {r.cleared ? 'Cleared' : 'Not cleared'}
-                </button>
+                </span>
               </div>
             ))}
           </div>
         );
       })}
+      <StudentStandingModal
+        show={!!selectedStudent}
+        student={selectedStudent}
+        onClose={() => setSelectedStudent(null)}
+        onSubmit={setClearance}
+      />
     </div>
   );
 }

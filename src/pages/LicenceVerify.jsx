@@ -325,7 +325,13 @@ export default function LicenceVerify({ onApproved }) {
       <div style={{
         marginTop: 24, fontSize: 10, color: 'var(--text-muted)', letterSpacing: '.08em',
       }}>
-        Julharie Maddin · ASEADO v1.0
+       <a  //href="https://julhariemaddin.is-a.dev" 
+       target="_blank"
+        rel="noopener noreferrer" style={{
+            color: 'var(--text-muted)', textDecoration: 'underline',
+          }}>
+            Powered by Null-Pointer
+          </a>
       </div>
     </div>
   );

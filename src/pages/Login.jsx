@@ -107,7 +107,11 @@ export default function Login({ onLogin }) {
           fontSize: 10, color: 'var(--text-muted)',
           textAlign: 'center', letterSpacing: '.06em',
         }}>
-          Julharie Maddin · ASEADO v1.0
+          <a href="https://julhariemaddin.is-a.dev" target="_blank" rel="noopener noreferrer" style={{
+            color: 'var(--text-muted)', textDecoration: 'underline',
+          }}>
+            Powered by Null-Pointer
+          </a>
         </div>
       </motion.div>
     </div>

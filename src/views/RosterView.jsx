@@ -21,6 +21,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
   const depts = roster.departments || [];
   const [deptIdx, setDeptIdx] = useState(0);
   const [programIdx, setProgramIdx] = useState(-1);
+  const [yearFilter, setYearFilter] = useState('ALL');
   const [searchInput, setSearchInput] = useState(''); // what the text field shows, updates instantly
   const [search, setSearch] = useState('');            // debounced value actually used for filtering
   const [collapsed, setCollapsed] = useState({}); // programName -> bool
@@ -38,6 +39,15 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
   const totalStudents = depts.reduce((sum, d) =>
     sum + d.programs.reduce((s2, p) => s2 + p.years.reduce((s3, y) => s3 + y.students.length, 0), 0), 0);
 
+  // Distinct years across the selected department's programs, sorted —
+  // scoped the same way the Program dropdown already is (per-department),
+  // so switching department also narrows which years are even offered.
+  const availableYears = useMemo(() => {
+    const set = new Set();
+    programs.forEach((p) => p.years.forEach((y) => set.add(y.year)));
+    return [...set].sort();
+  }, [programs]);
+
   const q = search.toLowerCase().trim();
 
   const matchedPrograms = useMemo(() => {
@@ -46,6 +56,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
     return programsToShow
       .map((program) => {
         const yearBlocks = program.years
+          .filter((yg) => yearFilter === 'ALL' || yg.year === yearFilter)
           .map((yg) => {
             const rows = yg.students.filter((s) => {
               if (!q) return true;
@@ -62,7 +73,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
         return { programName: program.programName, yearBlocks, count };
       })
       .filter(Boolean);
-  }, [dept, programIdx, q]);
+  }, [dept, programIdx, yearFilter, q]);
 
   const filteredCount = matchedPrograms.reduce((n, p) => n + p.count, 0);
 
@@ -95,6 +106,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
   function handleDeptChange(e) {
     setDeptIdx(Number(e.target.value));
     setProgramIdx(-1);
+    setYearFilter('ALL');
   }
 
   // Default to collapsed when browsing "All programs" with no active
@@ -167,6 +179,13 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
             <select value={programIdx} onChange={(e) => setProgramIdx(Number(e.target.value))}>
               <option value={-1}>All programs</option>
               {programs.map((p, i) => <option key={i} value={i}>{p.programName}</option>)}
+            </select>
+          </div>
+          <div className="field" style={{ margin: 0, flex: 1, minWidth: 160 }}>
+            <label>Year</label>
+            <select value={yearFilter} onChange={(e) => setYearFilter(e.target.value)}>
+              <option value="ALL">All years</option>
+              {availableYears.map((y) => <option key={y} value={y}>Year {y}</option>)}
             </select>
           </div>
           <div className="roster-summary-chip">

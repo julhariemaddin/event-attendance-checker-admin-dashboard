@@ -437,12 +437,11 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                   padding: 28, maxWidth: 420,
                 }}>
                   {[
-                    ['NAME',         'Julharie Maddin'],
-                    ['ROLE',         'Systems Developer'],
+                    ['FOUNDER',         'Julharie Maddin'],
+                    ['ROLE',         'CCS GOVERNOR & Backend Developer'],
  ['INSTITUTION', 'Jose Rizal Memorial State University - Siocon Campus'],
                     ['PROGRAMME',    'BS Computer Science'],
-                    ['CERTIFICATION','NC II · Computer Systems Servicing (2025)'],
-                    ['ORCID',        '0009-0009-3366-1271'],
+                    ['ORCID RESEARCHER ID',        '0009-0009-3366-1271'],
                   ].map(([l, v]) => (
                     <div key={l} style={{
                       padding: '12px 0',
@@ -477,6 +476,27 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                       }}
                     >
                       julhariemaddin.is-a.dev ↗
+                    </a>
+                  </div>
+                  <div style={{ padding: '12px 0 0' }}>
+                    <div style={{
+                      fontSize: 9, fontWeight: 800, letterSpacing: '.16em',
+                      color: 'var(--text-muted)', marginBottom: 6,
+                    }}>ORGANIZATION</div>
+                    <a
+                      //href=""
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        fontSize: 12, fontWeight: 700,
+                        color: 'var(--text-primary)', lineHeight: 1.5,
+                        padding: '8px 12px', borderRadius: 8,
+                        background: 'var(--bg-subtle)', border: '1px solid var(--border)',
+                        wordBreak: 'break-all', textDecoration: 'none',
+                      }}
+                    >
+                      Null-Pointer↗
                     </a>
                   </div>
                 </div>

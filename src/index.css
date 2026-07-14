@@ -694,17 +694,17 @@ tbody tr:hover { background: var(--bg-subtle); }
 .standing-row-bar-fill { display: block; height: 100%; border-radius: 999px; background: var(--text-secondary); }
 .standing-row-pct { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text-primary); text-align: right; }
 
-.standing-clear-btn {
+.standing-row { transition: background .12s; }
+.standing-row:hover { background: var(--bg-subtle); }
+
+.standing-clear-badge {
   font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
   padding: 6px 10px; border-radius: 7px; text-align: center;
   border: 1px solid var(--border); background: var(--bg-subtle); color: var(--text-muted);
-  transition: all .15s;
 }
-.standing-clear-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
-.standing-clear-btn.cleared {
+.standing-clear-badge.cleared {
   border-color: var(--status-live); background: rgba(34,197,94,0.08); color: var(--status-live);
 }
-.standing-clear-btn:disabled { opacity: .5; cursor: default; }
 
 @media (max-width: 760px) {
   .standing-row { grid-template-columns: 1fr 60px; row-gap: 6px; }

@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   { view: 'monitor',     label: 'Live Monitor',  icon: Radio,         requiresProfile: true  },
   { view: 'events',      label: 'Events',         icon: CalendarClock, requiresProfile: true  },
   { view: 'history',     label: 'History',        icon: HistoryIcon,  requiresProfile: true  },
-  { view: 'standing',    label: 'Standing - (BETA)',       icon: TrendingUp,   requiresProfile: true  },
+  { view: 'standing',    label: 'Standing - [BETA]',       icon: TrendingUp,   requiresProfile: true  },
   { view: 'roster',      label: 'Roster',         icon: Users,        requiresProfile: true  },
   { view: 'import',      label: 'Import',         icon: Upload,       requiresProfile: true  },
   { view: 'departments', label: 'Departments',    icon: Building2,    requiresProfile: false },
