@@ -649,6 +649,68 @@ tbody tr:hover { background: var(--bg-subtle); }
   border-radius: 20px; padding: 3px 9px; font-family: var(--mono);
 }
 
+/* ============================================================
+   Standing — attendance analytics + clearance
+   Deliberately monochrome, matching the rest of the app ("zero color
+   cast anywhere except the live-status dot"). Attendance rate is shown
+   as plain numbers/grayscale bars, no traffic-light color tiers — the
+   ONLY color in this whole view is the cleared/not-cleared state,
+   mirroring the exact same green-vs-neutral pattern already used for
+   the server connection dot elsewhere in the app.
+============================================================ */
+.standing-group {
+  border-radius: 14px;
+  padding: 6px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.standing-group-head {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 12px 14px; background: transparent; border: none; border-radius: 10px;
+  cursor: pointer; text-align: left; transition: background .15s;
+}
+.standing-group-head:hover { background: var(--bg-subtle); }
+.standing-group-chevron { font-size: 11px; color: var(--text-muted); flex-shrink: 0; }
+.standing-group-title { flex: 1; font-weight: 800; font-size: 13px; color: var(--text-primary); }
+.standing-group-count {
+  font-size: 10px; font-weight: 800; color: var(--text-secondary);
+  background: var(--bg-subtle); border: 1px solid var(--border);
+  border-radius: 20px; padding: 3px 9px; font-family: var(--mono);
+}
+.standing-group-avg { font-family: var(--mono); font-size: 11px; color: var(--text-muted); }
+
+.standing-row {
+  display: grid;
+  grid-template-columns: 92px 1fr 76px 90px 46px 104px;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-top: 1px solid var(--border);
+}
+.standing-row-id { font-family: var(--mono); font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.standing-row-name { font-size: 13px; font-weight: 600; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.standing-row-count { font-family: var(--mono); font-size: 11px; color: var(--text-muted); text-align: right; }
+.standing-row-bar-track { display: block; height: 5px; border-radius: 999px; background: var(--bg-subtle); overflow: hidden; }
+.standing-row-bar-fill { display: block; height: 100%; border-radius: 999px; background: var(--text-secondary); }
+.standing-row-pct { font-family: var(--mono); font-size: 12px; font-weight: 700; color: var(--text-primary); text-align: right; }
+
+.standing-clear-btn {
+  font-size: 10px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase;
+  padding: 6px 10px; border-radius: 7px; text-align: center;
+  border: 1px solid var(--border); background: var(--bg-subtle); color: var(--text-muted);
+  transition: all .15s;
+}
+.standing-clear-btn:hover { border-color: var(--border-strong); color: var(--text-secondary); }
+.standing-clear-btn.cleared {
+  border-color: var(--status-live); background: rgba(34,197,94,0.08); color: var(--status-live);
+}
+.standing-clear-btn:disabled { opacity: .5; cursor: default; }
+
+@media (max-width: 760px) {
+  .standing-row { grid-template-columns: 1fr 60px; row-gap: 6px; }
+  .standing-row-id, .standing-row-bar-track { display: none; }
+}
+
 .roster-year-chip {
   display: inline-block; margin: 10px 8px 8px; padding: 3px 10px;
   font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;

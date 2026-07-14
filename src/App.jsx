@@ -10,6 +10,7 @@ import { MonitorView }     from './views/MonitorView.jsx';
 import { EventsView }      from './views/EventsView.jsx';
 import { RosterView }      from './views/RosterView.jsx';
 import { HistoryView }     from './views/HistoryView.jsx';
+import { StandingView }    from './views/StandingView.jsx';
 import { ImportView }      from './views/ImportView.jsx';
 import { DepartmentsView } from './views/DepartmentsView.jsx';
 import { ScannerView }     from './views/ScannerView.jsx';
@@ -196,6 +197,15 @@ export default function App({ onBack, onLogout }) {
     })();
   }, []);
 
+  // Safety net: departments are already fetched on profile select/create/
+  // import in their own handlers, but this closes the gap for any path
+  // that might race or get missed — whenever the active profile actually
+  // changes, department data is guaranteed fresh without needing to visit
+  // the Departments tab first.
+  useEffect(() => {
+    if (activeProfileId) loadDepartments(activeProfileId);
+  }, [activeProfileId]);
+
   // ============================================================
   // Profiles
   // ============================================================
@@ -223,6 +233,13 @@ export default function App({ onBack, onLogout }) {
     } else {
       setEvents([]);
       setRoster({ departments: [] });
+      // department_templates lives in the shared registry.db, not the
+      // per-profile data.db — it doesn't need an active profile to exist.
+      // Without this, creating the very first V1 profile would show an
+      // empty department dropdown even if templates already exist from
+      // an earlier session, since loadDepartments() was only ever called
+      // in the branch above (which requires id to be truthy).
+      loadDepartments(null);
     }
   }
 
@@ -743,6 +760,9 @@ async function handleStopConfirm() {
           )}
           {safeView === 'history' && hasProfile && (
             <HistoryView expandEventId={historyExpandId} onExpandHandled={() => setHistoryExpandId(null)} />
+          )}
+          {safeView === 'standing' && hasProfile && (
+            <StandingView isV2={isV2} toast={toast} />
           )}
           {safeView === 'roster' && hasProfile && (
             <RosterView
