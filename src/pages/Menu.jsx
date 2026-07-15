@@ -405,12 +405,12 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                   </div>
                   <hr style={{ border: 'none', borderTop: '1px solid var(--border)', margin: '0 0 20px' }} />
                   {[
-                    ['VERSION',       '1.0.0'],
-                    ['STACK',         'Spring Boot 4.1.0 · SQLite · React (Vite) · Tauri · Liberica JDK 21'],
-                    ['ARCHITECTURE',  'Fully offline desktop. QR/barcode scanning over LAN via WebSocket.'],
- ['LICENCE', licenceInfo ? `${licenceInfo.subject}` : '-'],
- ['EXPIRES', licenceInfo ? formatExpiry(licenceInfo.expiration) : '-'],
-                  ].map(([l, v]) => (
+  ['VERSION',      '1.0.0'],
+  ['WHAT IT IS',   'A check-in system for campus events scan a student ID with your phone, and attendance is recorded instantly, no paper sign-in sheet needed.'],
+  ['HOW IT RUNS',  'Everything runs locally on this computer. No internet connection is required once installed phones connect over the same WiFi network to scan or wired connections, and all data stays on this machine.'],
+  ['LICENCE', licenceInfo ? `${licenceInfo.subject}` : '-'],
+  ['EXPIRES', licenceInfo ? formatExpiry(licenceInfo.expiration) : '-'],
+].map(([l, v]) => (
                     <div key={l} style={{ marginBottom: 16 }}>
                       <div style={{
                         fontSize: 9, fontWeight: 800, letterSpacing: '.16em',
@@ -506,42 +506,42 @@ export default function Menu({ onOpenAdmin, onLogout }) {
             {/* ── SETTINGS ───────────────────────────────────── */}
             {panel === 'settings' && (
               <motion.div key="settings" {...panelMotion}>
- <PanelHeader title="Settings" desc="Runtime configuration - read-only." />
+<PanelHeader title="Settings" desc="How this app is set up on this computer." />
 
-                <div style={{
-                  maxWidth: 540, background: 'var(--bg-surface)',
-                  border: '1px solid var(--border)', borderRadius: 14, padding: '6px 20px',
-                }}>
-                  {[
-                    ['Workspace folder',  workspace,        'Full path to registry.db and profile databases.'],
-                    ['Server port',       '8080',           'Spring Boot HTTP + WebSocket (scanner, API).'],
-                    ['Admin access',      'JWT-protected',  'Token issued after login, stored in sessionStorage.'],
-                    ['Scanner URL',       scannerUrl,       'Accessible from any device on the same LAN.'],
- ['Scanner access', 'Open (no auth)', 'Phone browser needs no login - scans via WebSocket.'],
- ['Licence subject', licenceInfo?.subject || '-', 'From the active licence key.'],
- ['Licence username', licenceInfo?.username || '-', 'Admin credentials embedded in the licence.'],
-                  ].map(([k, v, hint], i, arr) => (
-                    <div key={k} style={{ padding: '14px 0', borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--border)' }}>
-                      <div style={{
-                        display: 'flex', justifyContent: 'space-between',
-                        alignItems: 'flex-start', marginBottom: 4, gap: 16,
-                      }}>
-                        <span style={{
-                          fontSize: 12, fontWeight: 700,
-                          letterSpacing: '.04em', flexShrink: 0,
-                        }}>{k}</span>
-                        <span style={{
-                          fontSize: 11, fontFamily: 'var(--mono)',
-                          color: 'var(--text-secondary)',
-                          textAlign: 'right', wordBreak: 'break-all',
-                        }}>{v}</span>
-                      </div>
-                      <div style={{ fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.6 }}>
-                        {hint}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+<div style={{
+  maxWidth: 540, background: 'var(--bg-surface)',
+  border: '1px solid var(--border)', borderRadius: 14, padding: '6px 20px',
+}}>
+  {[
+    ['Data folder',      workspace,        'Where your event and student records are saved on this computer.'],
+    ['Connection port',  '8080',           'Used internally by the app to communicate with itself — nothing you need to change.'],
+    ['Login required',   'Yes',            'You must log in each time to open the admin console.'],
+    ['Scanner address',  scannerUrl,       'Open this on any phone connected to the same WiFi to start scanning.'],
+    ['Scanner login',    'Not required',   'Phones don\u2019t need to log in — just be on the same WiFi network as this computer.'],
+    ['Licensed to',      licenceInfo?.subject || '-', 'The name on file for your current licence.'],
+    ['Admin username',   licenceInfo?.username || '-', 'The login username tied to your licence.'],
+  ].map(([k, v, hint], i, arr) => (
+    <div key={k} style={{ padding: '14px 0', borderBottom: i === arr.length - 1 ? 'none' : '1px solid var(--border)' }}>
+      <div style={{
+        display: 'flex', justifyContent: 'space-between',
+        alignItems: 'flex-start', marginBottom: 4, gap: 16,
+      }}>
+        <span style={{
+          fontSize: 12, fontWeight: 700,
+          letterSpacing: '.04em', flexShrink: 0,
+        }}>{k}</span>
+        <span style={{
+          fontSize: 11, fontFamily: 'var(--mono)',
+          color: 'var(--text-secondary)',
+          textAlign: 'right', wordBreak: 'break-all',
+        }}>{v}</span>
+      </div>
+      <div style={{ fontSize: 10, color: 'var(--text-muted)', lineHeight: 1.6 }}>
+        {hint}
+      </div>
+    </div>
+  ))}
+</div>
               </motion.div>
             )}
 
