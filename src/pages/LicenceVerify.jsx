@@ -98,9 +98,15 @@ export default function LicenceVerify({ onApproved }) {
           color: 'var(--text-primary)', fontFamily: 'var(--mono)',
         }}>ASEADO</div>
         <div style={{
-          fontSize: 9, letterSpacing: '.22em',
-          color: 'var(--text-muted)', marginTop: 6, fontWeight: 700,
-        }}>LICENCE ACTIVATION</div>
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 8,
+        }}>
+          <span style={{ height: 1, width: 18, background: 'var(--border-strong)' }} />
+          <span style={{
+            fontSize: 9, letterSpacing: '.22em',
+            color: 'var(--text-muted)', fontWeight: 700, textTransform: 'uppercase',
+          }}>Licence Activation</span>
+          <span style={{ height: 1, width: 18, background: 'var(--border-strong)' }} />
+        </div>
       </motion.div>
 
  {/* ── SAVED MODE - shows info, option to continue or replace ── */}
@@ -127,7 +133,7 @@ export default function LicenceVerify({ onApproved }) {
             }} />
             <span style={{
               fontSize: 11, fontWeight: 800, letterSpacing: '.1em', color: '#22c55e',
-            }}>LICENCE ACTIVE</span>
+            }}>Licence active</span>
           </div>
 
           {/* Licence info rows */}
@@ -144,7 +150,7 @@ export default function LicenceVerify({ onApproved }) {
                 borderBottom: '1px solid var(--border)',
               }}>
                 <span style={{
-                  fontSize: 9, fontWeight: 800, letterSpacing: '.16em',
+                  fontSize: 9, fontWeight: 800, letterSpacing: '.08em',
                   color: 'var(--text-muted)',
                 }}>{label}</span>
                 <span style={{
@@ -161,8 +167,8 @@ export default function LicenceVerify({ onApproved }) {
 
           {/* Primary action */}
           <button onClick={onApproved} style={{
-            padding: 14, background: 'var(--text-primary)', color: 'var(--bg-base)',
-            border: 'none', fontSize: 11, fontWeight: 800, letterSpacing: '.14em',
+            padding: 14, background: 'var(--board-amber)', color: '#241505',
+            border: 'none', borderRadius: 9, fontSize: 11, fontWeight: 800, letterSpacing: '.06em',
             cursor: 'pointer', fontFamily: 'inherit',
           }}>
             CONTINUE TO LOGIN
@@ -210,9 +216,9 @@ export default function LicenceVerify({ onApproved }) {
             <>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <label style={{
-                  fontSize: 9, fontWeight: 800, letterSpacing: '.18em',
+                  fontSize: 9, fontWeight: 800, letterSpacing: '.08em',
                   color: 'var(--text-muted)',
-                }}>LICENCE KEY</label>
+                }}>Licence key</label>
                 <textarea
                   rows={4}
                   value={key}
@@ -245,8 +251,8 @@ export default function LicenceVerify({ onApproved }) {
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={verify} disabled={isChecking} style={{
                   flex: 1, padding: 14,
-                  background: 'var(--text-primary)', color: 'var(--bg-base)',
-                  border: 'none', fontSize: 11, fontWeight: 800, letterSpacing: '.14em',
+                  background: 'var(--board-amber)', color: '#241505',
+                  border: 'none', borderRadius: 9, fontSize: 11, fontWeight: 800, letterSpacing: '.06em',
                   cursor: isChecking ? 'default' : 'pointer',
                   opacity: isChecking ? .5 : 1, fontFamily: 'inherit',
                 }}>
@@ -295,7 +301,7 @@ export default function LicenceVerify({ onApproved }) {
                     borderBottom: '1px solid var(--border)',
                   }}>
                     <span style={{
-                      fontSize: 9, fontWeight: 800, letterSpacing: '.16em',
+                      fontSize: 9, fontWeight: 800, letterSpacing: '.08em',
                       color: 'var(--text-muted)',
                     }}>{label}</span>
                     <span style={{
@@ -311,8 +317,8 @@ export default function LicenceVerify({ onApproved }) {
               </div>
 
               <button onClick={onApproved} style={{
-                padding: 14, background: 'var(--text-primary)', color: 'var(--bg-base)',
-                border: 'none', fontSize: 11, fontWeight: 800, letterSpacing: '.14em',
+                padding: 14, background: 'var(--board-amber)', color: '#241505',
+                border: 'none', borderRadius: 9, fontSize: 11, fontWeight: 800, letterSpacing: '.06em',
                 cursor: 'pointer', fontFamily: 'inherit',
               }}>
                 CONTINUE TO LOGIN

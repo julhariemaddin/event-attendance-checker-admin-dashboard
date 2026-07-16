@@ -4,7 +4,7 @@ import { Modal } from '../components/Modal.jsx';
 export function ReportLinksModal({ show, onClose, files, onDownload }) {
   return (
     <Modal show={show} onClose={onClose} title="Generated reports" footer={(
-      <button className="btn" onClick={onClose}>CLOSE</button>
+      <button className="btn" onClick={onClose}>Close</button>
     )} bodyStyle={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {files.map((f, i) => {
  const label = (f.departmentLabel ? f.departmentLabel + ' - ' : '') + f.fileType.toUpperCase();

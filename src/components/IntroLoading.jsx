@@ -1,25 +1,28 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { API_BASE } from '../api/client.js';
 
 const TITLE = 'ASEADO';
 const SLOGAN = 'Fast, Simple & Secure';
 
-const letterVariants = {
-  hidden: { opacity: 0, y: 24, filter: 'blur(10px)', scale: 0.85 },
-  show: (i) => ({
-    opacity: 1, y: 0, filter: 'blur(0px)', scale: 1,
-    transition: { delay: 0.08 * i, duration: 0.55, ease: [0.22, 1, 0.36, 1] },
-  }),
-};
-
-// Minimum time the animation gets to play before it's allowed to end,
-// even if the backend responds instantly (avoids a jarring flash-cut).
-const MIN_INTRO_MS = 2200;
-// Hard ceiling — if backend genuinely hangs, stop waiting and hand off
-// anyway so the user isn't stuck on a splash screen forever.
+// Research on this stuff is pretty consistent (Slack, Spotify, Skype,
+// Airbnb): one clean, well-sprung motion, under ~2 seconds, then get out
+// of the way. The "fun" comes from the bounce being nicely tuned, not
+// from a multi-act story. So: logo pops in with a spring + one quick
+// shine, wordmark follows, done.
+const MIN_INTRO_MS = 1300;
+// Hard ceiling — if the backend genuinely hangs, stop waiting and hand
+// off anyway so the user isn't stuck on a splash screen forever.
 const MAX_WAIT_MS = 60000;
 const POLL_INTERVAL_MS = 500;
+
+const letterVariants = {
+  hidden: { opacity: 0, y: 10 },
+  show: (i) => ({
+    opacity: 1, y: 0,
+    transition: { delay: 0.55 + 0.04 * i, duration: 0.35, ease: 'easeOut' },
+  }),
+};
 
 export default function IntroLoading({ onDone }) {
   const [phase, setPhase] = useState('intro'); // intro | out
@@ -47,7 +50,8 @@ export default function IntroLoading({ onDone }) {
 
       if (cancelled) return;
 
-      // Respect the minimum runtime so the animation never gets cut off mid-sequence.
+      // Respect a small minimum so the logo's own animation never gets cut
+      // off mid-spring — not an artificial "watch my animation" delay.
       const elapsed = Date.now() - startRef.current;
       const remaining = Math.max(0, MIN_INTRO_MS - elapsed);
       await new Promise(res => setTimeout(res, remaining));
@@ -61,7 +65,7 @@ export default function IntroLoading({ onDone }) {
           sessionStorage.setItem('aseado_booted', '1');
           onDone();
         }
-      }, 480);
+      }, 400);
     }
 
     pollBackend();
@@ -77,48 +81,73 @@ export default function IntroLoading({ onDone }) {
         flexDirection: 'column', overflow: 'hidden',
       }}
       animate={{ opacity: phase === 'out' ? 0 : 1 }}
-      transition={{ duration: 0.48, ease: 'easeInOut' }}
+      transition={{ duration: 0.4, ease: 'easeInOut' }}
     >
-      {/* Ambient glow */}
+      {/* Ambient glow — a slow, quiet pulse behind everything (same idea as
+          Spotify's green pulse: calm, continuous, not attention-grabbing) */}
       <motion.div
         aria-hidden
         style={{
-          position: 'absolute', width: 520, height: 520, borderRadius: '50%',
-          background: 'radial-gradient(circle, var(--text-secondary) 0%, transparent 70%)',
-          opacity: 0.08, filter: 'blur(10px)',
+          position: 'absolute', width: 480, height: 480, borderRadius: '50%',
+          background: 'radial-gradient(circle, var(--board-amber) 0%, transparent 70%)',
+          opacity: 0.06, filter: 'blur(10px)',
         }}
-        animate={{ scale: [0.9, 1.05, 0.9] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+        animate={{ scale: [0.92, 1.04, 0.92] }}
+        transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
       />
 
-      <motion.div
-        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 18, zIndex: 1 }}
-      >
-        <div style={{ display: 'flex' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 22, zIndex: 1 }}>
+        {/* Logo — one confident spring-in, no ring, no sweep-and-scrub story.
+            A single shine glints across it right as it lands. */}
+        <div style={{ position: 'relative', width: 84, height: 84, overflow: 'hidden', borderRadius: '50%' }}>
+          <motion.img
+            src="/logo.png"
+            alt="ASEADO"
+            initial={{ opacity: 0, scale: 0.55 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ type: 'spring', stiffness: 280, damping: 16 }}
+            style={{ width: '100%', height: '100%', objectFit: 'contain', position: 'relative' }}
+          />
+          <motion.div
+            aria-hidden
+            initial={{ x: '-130%', opacity: 0 }}
+            animate={{ x: '130%', opacity: [0, 0.55, 0] }}
+            transition={{ duration: 0.55, delay: 0.32, ease: 'easeOut' }}
+            style={{
+              position: 'absolute', top: 0, bottom: 0, width: '45%',
+              background: 'linear-gradient(100deg, transparent, rgba(255,255,255,.6), transparent)',
+              mixBlendMode: 'overlay', pointerEvents: 'none',
+            }}
+          />
+        </div>
+
+        {/* Wordmark — clean fade + rise, no per-letter flip theatrics */}
+        <div style={{ display: 'flex', gap: 6 }}>
           {TITLE.split('').map((ch, i) => (
-            <motion.span
+            <motion.div
               key={i}
               custom={i}
               variants={letterVariants}
               initial="hidden"
               animate="show"
+              className="flap"
               style={{
-                fontSize: 'clamp(40px, 9vw, 64px)', fontWeight: 900,
-                letterSpacing: '.06em', fontFamily: 'var(--mono)',
-                color: 'var(--text-primary)', display: 'inline-block',
+                fontSize: 'clamp(24px, 5vw, 36px)', fontWeight: 800,
+                fontFamily: 'var(--mono)', width: 'clamp(26px, 5.4vw, 38px)',
+                height: 'clamp(36px, 7.2vw, 50px)',
               }}
             >
               {ch}
-            </motion.span>
+            </motion.div>
           ))}
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 * TITLE.length + 0.15, duration: 0.5 }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.95 }}
           style={{
-            fontSize: 13, letterSpacing: '.32em', fontWeight: 700,
+            fontSize: 11, letterSpacing: '.28em', fontWeight: 700,
             color: 'var(--text-secondary)', textTransform: 'uppercase',
           }}
         >
@@ -126,28 +155,21 @@ export default function IntroLoading({ onDone }) {
         </motion.div>
 
         <motion.div
-          initial={{ width: 0, opacity: 0 }}
-          animate={{ width: 180, opacity: 1 }}
-          transition={{ delay: 0.08 * TITLE.length + 0.35, duration: 0.6, ease: 'easeOut' }}
-          style={{ height: 2, background: 'linear-gradient(90deg, transparent, var(--text-primary), transparent)' }}
-        />
-
-        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.08 * TITLE.length + 0.55, duration: 0.4 }}
-          style={{ display: 'flex', gap: 6, marginTop: 4 }}
+          transition={{ duration: 0.4, delay: 1.05 }}
+          style={{ display: 'flex', gap: 6, marginTop: 2 }}
         >
           {[0, 1, 2].map(i => (
             <motion.span
               key={i}
               animate={{ opacity: [0.25, 1, 0.25] }}
               transition={{ duration: 1.1, repeat: Infinity, delay: i * 0.18, ease: 'easeInOut' }}
-              style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--text-secondary)' }}
+              style={{ width: 5, height: 5, borderRadius: '50%', background: 'var(--board-amber)' }}
             />
           ))}
         </motion.div>
-      </motion.div>
+      </div>
     </motion.div>
   );
 }

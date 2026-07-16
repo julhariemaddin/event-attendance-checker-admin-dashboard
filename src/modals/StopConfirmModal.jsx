@@ -15,7 +15,7 @@ export function StopConfirmModal({ show, onClose, onConfirm, loading }) {
     <Modal show={show} onClose={handleClose} title="Stop event?" footer={(
       <>
         <button className="btn" onClick={handleClose} disabled={loading}>
-          CANCEL
+          Cancel
         </button>
         <button className="btn danger" onClick={onConfirm} disabled={loading}>
           {loading ? (
@@ -27,10 +27,10 @@ export function StopConfirmModal({ show, onClose, onConfirm, loading }) {
                 animation: 'stopconfirm-spin 0.7s linear infinite',
                 display: 'inline-block',
               }} />
-              GENERATING…
+              Generating…
             </span>
           ) : (
-            'STOP & GENERATE'
+            'Stop & generate'
           )}
         </button>
         <style>{`@keyframes stopconfirm-spin { to { transform: rotate(360deg); } }`}</style>

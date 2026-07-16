@@ -16,7 +16,7 @@ export function ResetProfileConfirmModal({ show, onClose, profileName, onConfirm
   return (
     <Modal show={show} onClose={onClose} title="Reset active profile?" footer={(
       <>
-        <button className="btn" onClick={onClose}>CANCEL</button>
+        <button className="btn" onClick={onClose}>Cancel</button>
         <button className="btn danger" disabled={input.trim() !== 'RESET' || busy} onClick={handleConfirm}>
           {busy ? 'RESETTING...' : 'RESET PROFILE'}
         </button>

@@ -13,7 +13,7 @@ export function DeleteEventConfirmModal({ show, onClose, eventName, onConfirm })
   return (
     <Modal show={show} onClose={onClose} title="Delete this event?" footer={(
       <>
-        <button className="btn" onClick={onClose}>CANCEL</button>
+        <button className="btn" onClick={onClose}>Cancel</button>
         <button className="btn danger" disabled={busy} onClick={handleConfirm}>
           {busy ? 'DELETING...' : 'DELETE EVENT'}
         </button>

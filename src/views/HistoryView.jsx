@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { api } from '../api/client.js';
 
 // New view — searchable list of STOPPED events, each expandable into a
@@ -70,7 +71,7 @@ export function HistoryView({ expandEventId, onExpandHandled }) {
           placeholder="Search by event name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          style={{ width: 260, padding: '10px 14px', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }}
+          style={{ width: 260, padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 9, background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }}
         />
       </div>
 
@@ -92,41 +93,68 @@ export function HistoryView({ expandEventId, onExpandHandled }) {
         const summary = summaries[e.id];
         return (
           <div key={e.id} className="card" style={{ padding: 0, marginBottom: 12, overflow: 'hidden' }}>
-            <button
-              onClick={() => toggleExpand(e.id)}
-              style={{
-                width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                padding: '16px 20px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
-              }}
-            >
-              <div>
-                <strong>{e.name}</strong>{' '}
-                <span className="mono" style={{ color: 'var(--text-muted)' }}>#{e.id}</span>
- <div className="mono" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>{e.eventDate || '-'}</div>
+            <button className="history-row" onClick={() => toggleExpand(e.id)}>
+              <div className="history-row-main">
+                <div className="history-row-top">
+                  <span className="history-row-name">{e.name}</span>
+                  <span className="history-row-code">#{e.id}</span>
+                  <span className="badge b-grey">Stopped</span>
+                </div>
+                <div className="history-row-date">{e.eventDate || '—'}</div>
               </div>
-              <span style={{ fontSize: 12, color: 'var(--text-secondary)' }}>{isOpen ? '▲ HIDE' : '▼ DETAILS'}</span>
+              <span className={'history-row-chevron' + (isOpen ? ' open' : '')}>
+                <ChevronDown size={14} strokeWidth={2.4} />
+              </span>
             </button>
 
             {isOpen && (
               <div style={{ borderTop: '1px solid var(--border)', padding: '16px 20px' }}>
                 {summary === 'loading' && <div style={{ fontSize: 13, color: 'var(--text-muted)' }}>Loading summary...</div>}
-                {summary === 'error' && <div style={{ fontSize: 13, color: 'var(--accent-red, #b91c1c)' }}>Could not load summary for this event.</div>}
-                {summary && summary !== 'loading' && summary !== 'error' && (
-                  <div className="stat-grid">
-                    <div className="card stat-card">
-                      <div className="stat-label">Total scans</div>
-                      <div className="stat-value">{summary.totalScans}</div>
+                {summary === 'error' && <div style={{ fontSize: 13, color: '#ef4444' }}>Could not load summary for this event.</div>}
+                {summary && summary !== 'loading' && summary !== 'error' && (() => {
+                  const onTime = summary.totalScans - summary.lateArrivals;
+                  const pct = summary.totalScans === 0 ? null : Math.round((onTime / summary.totalScans) * 100);
+                  const r = 40;
+                  const circumference = 2 * Math.PI * r;
+                  const dash = pct === null ? 0 : (circumference * pct) / 100;
+                  return (
+                    <div className="card" style={{ display: 'flex', alignItems: 'center', gap: 24, flexWrap: 'wrap' }}>
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0 }}>
+                        <svg width="104" height="104" viewBox="0 0 100 100" style={{ transform: 'rotate(-90deg)' }}>
+                          <circle cx="50" cy="50" r={r} fill="none" stroke="var(--bg-subtle)" strokeWidth="10" />
+                          {pct !== null && (
+                            <circle
+                              cx="50" cy="50" r={r} fill="none"
+                              stroke="var(--board-amber)" strokeWidth="10" strokeLinecap="round"
+                              strokeDasharray={`${dash} ${circumference - dash}`}
+                            />
+                          )}
+                        </svg>
+                        <div style={{ marginTop: 10, textAlign: 'center' }}>
+                          <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', lineHeight: 1.1 }}>
+                            {pct === null ? '—' : `${pct}%`}
+                          </div>
+                          <div style={{ fontSize: 12, color: 'var(--text-secondary)', marginTop: 2 }}>On-time rate</div>
+                        </div>
+                      </div>
+
+                      <div style={{ flex: 1, minWidth: 180, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Total scans</span>
+                          <span style={{ fontSize: 14, fontWeight: 700 }}>{summary.totalScans}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Late arrivals</span>
+                          <span style={{ fontSize: 14, fontWeight: 700 }}>{summary.lateArrivals}</span>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                          <span style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Total logged out</span>
+                          <span style={{ fontSize: 14, fontWeight: 700 }}>{summary.totalLoggedOut}</span>
+                        </div>
+                      </div>
                     </div>
-                    <div className="card stat-card">
-                      <div className="stat-label">Late arrivals</div>
-                      <div className="stat-value">{summary.lateArrivals}</div>
-                    </div>
-                    <div className="card stat-card">
-                      <div className="stat-label">Total logged out</div>
-                      <div className="stat-value">{summary.totalLoggedOut}</div>
-                    </div>
-                  </div>
-                )}
+                  );
+                })()}
               </div>
             )}
           </div>

@@ -94,7 +94,7 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
   return (
     <Modal show={show} onClose={onClose} title={isEdit ? 'Edit person' : 'Add person'} footer={(
       <>
-        <button className="btn" onClick={onClose}>CANCEL</button>
+        <button className="btn" onClick={onClose}>Cancel</button>
         <button className="btn primary" onClick={handleSubmit}>{isEdit ? 'SAVE CHANGES' : 'ADD TO ROSTER'}</button>
       </>
     )}>

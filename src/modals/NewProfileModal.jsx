@@ -39,7 +39,7 @@ export function NewProfileModal({ show, onClose, departmentTemplates, onCreate, 
   return (
     <Modal show={show} onClose={onClose} title="New profile" footer={(
       <>
-        <button className="btn" onClick={onClose}>CANCEL</button>
+        <button className="btn" onClick={onClose}>Cancel</button>
         <button className="btn primary" onClick={handleCreate}>
           {v1Blocked ? 'CREATE DEPARTMENT' : 'CREATE PROFILE'}
         </button>

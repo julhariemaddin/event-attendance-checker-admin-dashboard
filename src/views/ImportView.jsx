@@ -56,7 +56,7 @@ export function ImportView({ importStatus, onUpload, onDelete }) {
       {imported ? (
         <div className="card">
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div className="badge b-green">IMPORTED</div>
+            <div className="badge b-green">Imported</div>
             <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>
               {count.toLocaleString()} student{count !== 1 ? 's' : ''} loaded
             </span>
@@ -73,7 +73,7 @@ export function ImportView({ importStatus, onUpload, onDelete }) {
       ) : (
         <div className="card">
           <div
-            style={{ border: '1px dashed ' + (dragOver ? 'var(--text-primary)' : 'var(--text-muted)'), padding: 40, textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s' }}
+            style={{ border: '1px dashed ' + (dragOver ? 'var(--board-amber)' : 'var(--text-muted)'), padding: 40, textAlign: 'center', cursor: 'pointer', transition: 'all 0.2s', borderRadius: 8, background: dragOver ? 'var(--board-amber-wash)' : 'transparent' }}
             onClick={() => inputRef.current && inputRef.current.click()}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
             onDragLeave={() => setDragOver(false)}
@@ -103,12 +103,12 @@ export function ImportView({ importStatus, onUpload, onDelete }) {
         <div className="card" style={{ marginTop: 24 }}>
           {result.status === 'VALID' ? (
             <>
-              <div className="badge b-green" style={{ marginBottom: 12 }}>VALID</div>
+              <div className="badge b-green" style={{ marginBottom: 12 }}>Valid</div>
  <div style={{ fontSize: 14, fontWeight: 700 }}>Imported {result.insertedCount ?? '-'} rows successfully.</div>
             </>
           ) : (
             <>
-              <div className="badge b-red" style={{ marginBottom: 12 }}>REJECTED</div>
+              <div className="badge b-red" style={{ marginBottom: 12 }}>Rejected</div>
               <div style={{ fontSize: 14, fontWeight: 700 }}>{result.rejectionReason || 'The file did not pass validation.'}</div>
               {result.rowErrors && result.rowErrors.length > 0 && (
                 <table style={{ marginTop: 16 }}>

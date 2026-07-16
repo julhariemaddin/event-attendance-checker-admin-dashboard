@@ -73,12 +73,12 @@ export function MonitorView({
   }, [showCutoffBanner, selectedEventId]);
 
   // Scan rate bar
- let ratePct = 0, rateLabel = total + ' scanned', rateHint = 'Enrolled count unavailable - check event filter or roster.', rateColor = 'var(--accent-green, #1e7d4e)';
+ let ratePct = 0, rateLabel = total + ' scanned', rateHint = 'Enrolled count unavailable - check event filter or roster.', rateColor = 'var(--status-live)';
   if (enrolledCount != null && enrolledCount > 0) {
     ratePct = Math.min(100, Math.round((total / enrolledCount) * 100));
     rateLabel = total + ' / ' + enrolledCount;
     rateHint = ratePct + '% of enrolled students have scanned in.';
-    rateColor = ratePct >= 80 ? 'var(--accent-green, #1e7d4e)' : ratePct >= 50 ? '#d35400' : 'var(--accent-green, #1e7d4e)';
+    rateColor = ratePct >= 80 ? 'var(--status-live)' : ratePct >= 50 ? 'var(--board-amber)' : 'var(--status-live)';
   }
 
   function runSearch(q) {
@@ -131,7 +131,7 @@ export function MonitorView({
  <option key={e.id} value={e.id}>{e.name} - {e.eventDate} ({e.status})</option>
               ))}
           </select>
-          <button className="btn" onClick={onRefresh}>REFRESH</button>
+          <button className="btn" onClick={onRefresh}>Refresh</button>
         </div>
       </div>
 
@@ -145,9 +145,9 @@ export function MonitorView({
       {hasEvent && (
         <div id="monitorContent">
           <div className="card manual-scan-box">
-            <div className="side-label" style={{ marginBottom: 12 }}>MANUAL SCAN</div>
+            <div className="side-label" style={{ marginBottom: 12 }}>Manual scan</div>
             {isPaused && (
-              <div style={{ marginBottom: 12, fontSize: 12, color: 'var(--accent-amber, #d35400)' }}>
+              <div style={{ marginBottom: 12, fontSize: 12, color: 'var(--board-amber)' }}>
  Event is paused - resume it to accept scans again. Existing records below are still visible.
               </div>
             )}
@@ -163,18 +163,18 @@ export function MonitorView({
                 <option value="LOGIN">Login</option>
                 <option value="LOGOUT" disabled={noLogout}>{noLogout ? 'Logout (disabled for this event)' : 'Logout'}</option>
               </select>
-              <button className="btn primary" disabled={isPaused} onClick={sendManual}>SEND</button>
-              <button className="btn" disabled={isPaused} onClick={() => { setSearchOpen((s) => !s); setSearchQuery(''); setSearchResults(null); }}>FIND BY NAME</button>
+              <button className="btn primary" disabled={isPaused} onClick={sendManual}>Send</button>
+              <button className="btn" disabled={isPaused} onClick={() => { setSearchOpen((s) => !s); setSearchQuery(''); setSearchResults(null); }}>Find by name</button>
             </div>
             {searchOpen && (
               <div style={{ marginTop: 16 }}>
                 <input
                   type="text" placeholder="Type a name..." autoFocus
-                  style={{ width: '100%', padding: '10px 14px', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }}
+                  className="search-dropdown-input"
                   value={searchQuery}
                   onChange={(e) => runSearch(e.target.value)}
                 />
-                <div style={{ marginTop: 12, maxHeight: 200, overflowY: 'auto', border: '1px solid var(--border)', background: 'var(--bg-surface)' }}>
+                <div className="search-dropdown-list">
                   {searchResults === 'error' && <div style={{ padding: 12, color: 'var(--text-primary)' }}>Search failed.</div>}
                   {Array.isArray(searchResults) && searchResults.length === 0 && (
                     <div style={{ padding: 12, color: 'var(--text-muted)' }}>No matches.</div>
@@ -196,7 +196,7 @@ export function MonitorView({
           </div>
 
           {showCutoffBanner && (
-            <div style={{ display: 'block', background: 'var(--accent-amber, #d35400)', color: '#fff', padding: '10px 18px', fontSize: 12, fontWeight: 700, letterSpacing: '.08em', marginBottom: 16 }}>
+            <div style={{ display: 'block', background: 'var(--board-amber)', color: '#fff', padding: '10px 18px', fontSize: 12, fontWeight: 700, letterSpacing: '.08em', marginBottom: 16 }}>
  ⏰ LATE CUTOFF PASSED - New logins are now marked LATE
             </div>
           )}
@@ -222,7 +222,7 @@ export function MonitorView({
 
           <div className="card" style={{ padding: '16px 20px', marginBottom: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', color: 'var(--text-secondary)' }}>SCAN RATE</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '.08em', color: 'var(--text-secondary)' }}>Scan rate</span>
               <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>{rateLabel}</span>
             </div>
             <div style={{ height: 6, background: 'var(--border)', borderRadius: 0, overflow: 'hidden' }}>
@@ -242,7 +242,7 @@ export function MonitorView({
               <div style={{ maxHeight: 500, overflowY: 'auto' }}>
                 {feed.length === 0 ? (
                   <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-muted)' }}>
-                    <div style={{ fontWeight: 700, marginBottom: 8 }}>WAITING FOR SCANS</div>
+                    <div style={{ fontWeight: 700, marginBottom: 8 }}>Waiting for scans</div>
                     <div>Use the connected mobile scanner to begin.</div>
                   </div>
                 ) : (
@@ -285,7 +285,7 @@ export function MonitorView({
                         <div className="irow-name">{r.lastname || ''}, {r.firstname || ''}</div>
                         <div className="irow-id mono">{r.studentId}</div>
                       </div>
-                      {r.isLate ? <span className="badge b-amber">LATE</span> : <span className="badge b-green">IN</span>}
+                      {r.isLate ? <span className="badge b-amber">Late</span> : <span className="badge b-green">In</span>}
                     </div>
                   ))
                 )}
@@ -294,9 +294,9 @@ export function MonitorView({
           </div>
 
           <div style={{ marginTop: 24, display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            {ev && ev.status === 'RUNNING' && <button className="btn" onClick={onPause}>PAUSE EVENT</button>}
-            {ev && ev.status === 'PAUSED' && <button className="btn" onClick={onResume}>RESUME EVENT</button>}
-            {ev && ev.status !== 'STOPPED' && <button className="btn danger" onClick={onStopClick}>STOP & GENERATE REPORT</button>}
+            {ev && ev.status === 'RUNNING' && <button className="btn" onClick={onPause}>Pause event</button>}
+            {ev && ev.status === 'PAUSED' && <button className="btn" onClick={onResume}>Resume event</button>}
+            {ev && ev.status !== 'STOPPED' && <button className="btn danger" onClick={onStopClick}>Stop & generate report</button>}
           </div>
         </div>
       )}

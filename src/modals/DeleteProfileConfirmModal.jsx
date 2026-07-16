@@ -16,7 +16,7 @@ export function DeleteProfileConfirmModal({ show, onClose, profileName, onConfir
   return (
     <Modal show={show} onClose={onClose} title="Delete profile?" footer={(
       <>
-        <button className="btn" onClick={onClose}>CANCEL</button>
+        <button className="btn" onClick={onClose}>Cancel</button>
         <button className="btn danger" disabled={input.trim() !== 'DELETE' || busy} onClick={handleConfirm}>
           {busy ? 'DELETING...' : 'DELETE PROFILE'}
         </button>

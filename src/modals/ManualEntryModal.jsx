@@ -95,13 +95,13 @@ export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, queu
     <Modal show={show} onClose={onClose} title="Complete unknown entry" footer={(
       <>
         <button className="btn" onClick={onClose}>{hasMorePending ? 'SKIP' : 'DISMISS'}</button>
-        <button className="btn primary" onClick={handleComplete}>COMPLETE LOGIN</button>
+        <button className="btn primary" onClick={handleComplete}>Complete login</button>
       </>
     )}>
       {hasMorePending && (
         <div style={{
           display: 'inline-block', marginBottom: 12, padding: '4px 10px', borderRadius: 999,
-          background: 'var(--accent-amber-tint, #fdf1e0)', color: 'var(--accent-amber, #d35400)',
+          background: 'var(--board-amber-wash)', color: 'var(--board-amber)',
           fontSize: 12, fontWeight: 600,
         }}>
           {queuePosition} of {queueTotal} pending

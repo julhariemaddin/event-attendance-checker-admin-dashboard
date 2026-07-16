@@ -33,7 +33,8 @@ export default function Login({ onLogin }) {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      minHeight: '100vh', background: 'var(--bg-base)', padding: 20, position: 'relative',
+      minHeight: '100vh', padding: 20, position: 'relative',
+      background: 'radial-gradient(circle at 50% 0%, var(--bg-subtle), var(--bg-base) 62%)',
     }}>
       <div style={{ position: 'fixed', top: 18, right: 18 }}>
         <ThemeToggle theme={theme} onToggle={toggleTheme} />
@@ -44,68 +45,67 @@ export default function Login({ onLogin }) {
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
         style={{
-          width: '100%', maxWidth: 360, background: 'var(--bg-card)',
-          border: '1px solid var(--border)', borderRadius: 14,
-          boxShadow: '0 24px 60px var(--shadow-color)',
-          padding: '40px 32px', display: 'flex', flexDirection: 'column', gap: 20,
+          width: '100%', maxWidth: 400,
+          background: 'var(--bg-surface)', border: '1px solid var(--border)',
+          borderRadius: 'var(--r-lg)', boxShadow: 'var(--shadow-3)',
+          padding: '38px 34px 30px',
         }}
       >
-        <div style={{ textAlign: 'center' }}>
-          <div style={{
-            fontSize: 28, fontWeight: 800, letterSpacing: '.22em',
-            color: 'var(--text-primary)', fontFamily: 'var(--mono)',
-          }}>ASEADO</div>
-          <div style={{
-            fontSize: 11, color: 'var(--text-muted)',
-            letterSpacing: '.14em', marginTop: 6, fontWeight: 600, textTransform: 'uppercase',
-          }}>Fast, Simple &amp; Secure</div>
-          <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 10 }}>Admin Console</div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 28 }}>
+          <img
+            src="/logo.png" alt="ASEADO"
+            style={{ width: 56, height: 56, marginBottom: 14, objectFit: 'contain' }}
+          />
+          <div style={{ fontSize: 19, fontWeight: 800, letterSpacing: '-.01em' }}>ASEADO</div>
+          <div style={{ fontSize: 12.5, color: 'var(--text-secondary)', marginTop: 4 }}>
+            Sign in to manage your events
+          </div>
         </div>
 
-        <Field label="USERNAME">
-          <input
-            style={inputStyle}
-            value={user} onChange={e => setUser(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && submit()} autoFocus
-          />
-        </Field>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label>Username</label>
+            <input
+              placeholder="e.g. Login Username"
+              value={user} onChange={e => setUser(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()} autoFocus
+            />
+          </div>
 
-        <Field label="PASSWORD">
-          <input
-            type="password"
-            style={inputStyle}
-            value={pass} onChange={e => setPass(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && submit()}
-          />
-        </Field>
+          <div className="field" style={{ marginBottom: 0 }}>
+            <label>Password</label>
+            <input
+              type="password"
+              placeholder="e.g. Login Password"
+              value={pass} onChange={e => setPass(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && submit()}
+            />
+          </div>
 
-        {err && (
-          <motion.div
-            initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
-            style={{
-              fontSize: 11, color: '#ef4444', padding: '9px 12px',
-              background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.25)',
-              borderRadius: 8,
-            }}
-          >{err}</motion.div>
-        )}
+          {err && (
+            <motion.div
+              initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }}
+              style={{
+                fontSize: 12, color: '#ef4444', padding: '9px 12px',
+                background: 'rgba(239,68,68,.08)', border: '1px solid rgba(239,68,68,.25)',
+                borderRadius: 8,
+              }}
+            >{err}</motion.div>
+          )}
 
-        <motion.button
-          onClick={submit} disabled={busy}
-          whileTap={{ scale: 0.98 }}
-          style={{
-            padding: 13, background: 'var(--text-primary)',
-            color: 'var(--bg-base)', border: 'none', borderRadius: 8,
-            fontSize: 11, fontWeight: 800, letterSpacing: '.14em',
-            cursor: busy ? 'default' : 'pointer', opacity: busy ? .6 : 1, fontFamily: 'inherit',
-          }}
-        >
-          {busy ? 'SIGNING IN…' : 'SIGN IN'}
-        </motion.button>
+          <motion.button
+            className="btn primary"
+            onClick={submit} disabled={busy}
+            whileTap={{ scale: 0.98 }}
+            style={{ padding: 13, marginTop: 4, opacity: busy ? .6 : 1 }}
+          >
+            {busy ? 'Signing in…' : 'Sign in'}
+          </motion.button>
+        </div>
 
         <div style={{
-          fontSize: 10, color: 'var(--text-muted)',
-          textAlign: 'center', letterSpacing: '.06em',
+          fontSize: 11, color: 'var(--text-muted)',
+          textAlign: 'center', marginTop: 24,
         }}>
           <a href="https://julhariemaddin.is-a.dev" target="_blank" rel="noopener noreferrer" style={{
             color: 'var(--text-muted)', textDecoration: 'underline',
@@ -117,22 +117,3 @@ export default function Login({ onLogin }) {
     </div>
   );
 }
-
-function Field({ label, children }) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-      <label style={{
-        fontSize: 9, fontWeight: 800, letterSpacing: '.16em',
-        color: 'var(--text-muted)',
-      }}>{label}</label>
-      {children}
-    </div>
-  );
-}
-
-const inputStyle = {
-  padding: '11px 13px', background: 'var(--bg-surface)',
-  border: '1px solid var(--border)', borderRadius: 8,
-  color: 'var(--text-primary)', fontSize: 13, outline: 'none',
-  width: '100%', fontFamily: 'inherit',
-};

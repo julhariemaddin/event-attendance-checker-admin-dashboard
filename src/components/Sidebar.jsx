@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import {
   Radio, CalendarClock, History as HistoryIcon, Users, Upload,
-  Building2, QrCode, Plus, Trash2, RotateCcw, TrendingUp,
+  Building2, QrCode, Plus, Trash2, RotateCcw, TrendingUp, Lock,
 } from 'lucide-react';
 
 // Sidebar — nav items that require an active profile are disabled + grayed
@@ -16,7 +16,7 @@ const NAV_ITEMS = [
   { view: 'monitor',     label: 'Live Monitor',  icon: Radio,         requiresProfile: true  },
   { view: 'events',      label: 'Events',         icon: CalendarClock, requiresProfile: true  },
   { view: 'history',     label: 'History',        icon: HistoryIcon,  requiresProfile: true  },
-  { view: 'standing',    label: 'Standing - [BETA]',       icon: TrendingUp,   requiresProfile: true  },
+  { view: 'standing',    label: 'Standing',       icon: TrendingUp,   requiresProfile: true, beta: true },
   { view: 'roster',      label: 'Roster',         icon: Users,        requiresProfile: true  },
   { view: 'import',      label: 'Import',         icon: Upload,       requiresProfile: true  },
   { view: 'departments', label: 'Departments',    icon: Building2,    requiresProfile: false },
@@ -43,7 +43,7 @@ export function Sidebar({
     <>
       <div id="sidebar" className={open ? 'open' : ''}>
 
- {/* Back-to-menu - only rendered (and only visible via CSS) on mobile,
+        {/* Back-to-menu — only rendered (and only visible via CSS) on mobile,
             right at the top of the drawer, so there's a single obvious
             menu control instead of two competing ones. */}
         {onBack && (
@@ -52,16 +52,16 @@ export function Sidebar({
             onClick={() => { onClose && onClose(); onBack(); }}
           >
             <span className="sidebar-back-icon">←</span>
-            BACK TO MENU
+            Back to menu
           </button>
         )}
 
         {/* ── Profiles section ─────────────────────────────────── */}
         <div className="side-section">
           <div className="side-label">
-            <span>PROFILES</span>
+            <span>Profiles</span>
             <button className="btn-ghost-small" onClick={onNewProfile}>
-              <Plus size={12} strokeWidth={3} /> NEW
+              <Plus size={12} strokeWidth={3} /> New
             </button>
           </div>
 
@@ -99,7 +99,7 @@ export function Sidebar({
                       <div className="pname">{p.name}</div>
                       <div className="pmode">
                         <span className="mode-tag">{p.mode}</span>
-                        {isActive ? 'ACTIVE' : 'SWITCH'}
+                        {isActive ? 'Active' : 'Switch'}
                       </div>
                     </div>
                     <button
@@ -117,8 +117,8 @@ export function Sidebar({
         </div>
 
         {/* ── Navigation section ───────────────────────────────── */}
-        <div className="side-section" style={{ paddingTop: 10 }}>
-          <div className="side-label">WORKSPACE</div>
+        <div className="side-section" style={{ paddingTop: 10, borderTop: '1px solid var(--border)' }}>
+          <div className="side-label">Workspace</div>
 
  {/* No-profile banner - shown when profile is required */}
           {!hasProfile && (
@@ -151,8 +151,15 @@ export function Sidebar({
                 }}
               >
                 <Icon size={15} strokeWidth={isActive ? 2.4 : 2} className="nav-btn-icon" />
-                <span>{item.label}</span>
- {disabled && <span className="nav-btn-locked"> - </span>}
+                <span className="nav-btn-label">
+                  {item.label}
+                  {item.beta && <span className="nav-btn-beta">Beta</span>}
+                </span>
+                {disabled && (
+                  <span className="nav-btn-locked" title="Select a profile first">
+                    <Lock size={11} strokeWidth={2.4} />
+                  </span>
+                )}
               </button>
             );
           })}
@@ -162,17 +169,17 @@ export function Sidebar({
         <div id="sidebar-footer">
           <div className="sf-row sf-profile">
             {activeProfile
-              ? `${activeProfile.name} · ${activeProfile.mode} MODE`
-              : 'NO ACTIVE PROFILE'}
+              ? `${activeProfile.name} · ${activeProfile.mode} mode`
+              : 'No active profile'}
           </div>
           <div className="sf-row mono sf-status">
             <span className="sf-status-dot" />
-            LOCAL SERVER ACTIVE
+            Local server active
           </div>
           <div className="footer-actions">
             {activeProfile && (
               <button className="btn-ghost-small" onClick={onResetProfileClick}>
-                <RotateCcw size={11} strokeWidth={3} /> RESET PROFILE
+                <RotateCcw size={11} strokeWidth={3} /> Reset profile
               </button>
             )}
           </div>

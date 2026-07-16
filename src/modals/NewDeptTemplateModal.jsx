@@ -17,8 +17,8 @@ export function NewDeptTemplateModal({ show, onClose, onCreate, toast }) {
   return (
     <Modal show={show} onClose={onClose} title="New template" footer={(
       <>
-        <button className="btn" onClick={onClose}>CANCEL</button>
-        <button className="btn primary" onClick={handleCreate}>ADD TEMPLATE</button>
+        <button className="btn" onClick={onClose}>Cancel</button>
+        <button className="btn primary" onClick={handleCreate}>Add template</button>
       </>
     )}>
       <div className="field"><label>Code</label><input type="text" placeholder="e.g. CCS" value={code} onChange={(e) => setCode(e.target.value)} /></div>

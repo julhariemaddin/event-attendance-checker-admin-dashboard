@@ -165,9 +165,9 @@ export default function Bootstrap({ onDone }) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               <label style={{
-                fontSize: 9, fontWeight: 800, letterSpacing: '.18em',
+                fontSize: 9, fontWeight: 800, letterSpacing: '.08em',
                 color: 'var(--text-muted)',
-              }}>WORKSPACE ROOT PATH</label>
+              }}>Workspace root path</label>
               <div style={{ display: 'flex', gap: 8 }}>
                 <input
                   value={path}
@@ -230,9 +230,9 @@ export default function Bootstrap({ onDone }) {
               disabled={busy}
               style={{
                 padding: 14,
-                background: 'var(--text-primary)', color: 'var(--bg-base)',
-                border: 'none',
-                fontSize: 11, fontWeight: 800, letterSpacing: '.14em',
+                background: 'var(--board-amber)', color: '#241505',
+                border: 'none', borderRadius: 9,
+                fontSize: 11, fontWeight: 800, letterSpacing: '.06em',
                 cursor: busy ? 'default' : 'pointer',
                 opacity: busy ? .5 : 1,
                 fontFamily: 'inherit',
@@ -258,7 +258,7 @@ export default function Bootstrap({ onDone }) {
               <span style={{
                 fontSize: 11, fontWeight: 800,
                 letterSpacing: '.1em', color: '#22c55e',
-              }}>WORKSPACE CONFIGURED</span>
+              }}>Workspace configured</span>
             </div>
 
             <div style={{
@@ -267,7 +267,7 @@ export default function Bootstrap({ onDone }) {
               fontSize: 11, fontFamily: 'var(--mono)',
               color: 'var(--text-secondary)', lineHeight: 1.8,
             }}>
-              <div style={{ marginBottom: 4, color: 'var(--text-muted)', fontSize: 9, letterSpacing: '.14em', fontWeight: 800 }}>PATH</div>
+              <div style={{ marginBottom: 4, color: 'var(--text-muted)', fontSize: 9, letterSpacing: '.02em', fontWeight: 700 }}>Path</div>
               {root}
             </div>
 

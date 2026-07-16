@@ -132,7 +132,7 @@ export function StandingView({ isV2, toast }) {
             type="text" className="mono" placeholder="Search name or ID…"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            style={{ width: 220, padding: '10px 14px', border: '1px solid var(--border)', background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }}
+            style={{ width: 220, padding: '10px 14px', border: '1px solid var(--border)', borderRadius: 9, background: 'var(--bg-base)', color: 'var(--text-primary)', fontSize: 13 }}
           />
           <button className="btn" onClick={handleExport} disabled={exporting}>
             {exporting ? 'Generating…' : 'Export report'}
@@ -168,6 +168,15 @@ export function StandingView({ isV2, toast }) {
         </div>
       )}
 
+      {groups.length > 0 && (
+        <div className="standing-list-head">
+          <span>ID</span>
+          <span>Name</span>
+          <span>Attendance</span>
+          <span>Status</span>
+        </div>
+      )}
+
       {groups.map((group) => {
         const isCollapsed = !!collapsed[group.key];
         const eligible = group.students.filter((s) => s.eligibleEvents > 0);
@@ -188,15 +197,17 @@ export function StandingView({ isV2, toast }) {
               <div key={r.studentId} className="standing-row" style={{ cursor: 'pointer' }} onClick={() => setSelectedStudent(r)}>
                 <span className="standing-row-id">{r.studentId}</span>
                 <span className="standing-row-name">{r.lastname}, {r.firstname}</span>
-                <span className="standing-row-count">
-                  {r.eligibleEvents === 0 ? 'no data' : `${r.presentCount} / ${r.eligibleEvents}`}
-                </span>
-                <span className="standing-row-bar-track">
-                  <span className="standing-row-bar-fill" style={{ width: `${r.attendanceRate}%` }} />
-                </span>
-                <span className="standing-row-pct">
-                  {r.eligibleEvents === 0 ? '—' : `${Math.round(r.attendanceRate)}%`}
-                </span>
+                <div className="standing-row-progress">
+                  <span className="standing-row-count">
+                    {r.eligibleEvents === 0 ? 'no data' : `${r.presentCount}/${r.eligibleEvents}`}
+                  </span>
+                  <span className="standing-row-bar-track">
+                    <span className="standing-row-bar-fill" style={{ width: `${r.attendanceRate}%` }} />
+                  </span>
+                  <span className="standing-row-pct">
+                    {r.eligibleEvents === 0 ? '—' : `${Math.round(r.attendanceRate)}%`}
+                  </span>
+                </div>
                 <span className={'standing-clear-badge' + (r.cleared ? ' cleared' : '')}>
                   {r.cleared ? 'Cleared' : 'Not cleared'}
                 </span>

@@ -5,8 +5,8 @@ export function DeleteStudentConfirmModal({ show, onClose, studentName, onConfir
   return (
     <Modal show={show} onClose={onClose} title="Delete person" footer={(
       <>
-        <button className="btn" onClick={onClose}>CANCEL</button>
-        <button className="btn danger" onClick={onConfirm}>DELETE</button>
+        <button className="btn" onClick={onClose}>Cancel</button>
+        <button className="btn danger" onClick={onConfirm}>Delete</button>
       </>
     )}>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>

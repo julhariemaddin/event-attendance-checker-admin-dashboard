@@ -13,7 +13,7 @@ export function DeleteDeptConfirmModal({ show, onClose, deptCode, affectedCount,
   return (
     <Modal show={show} onClose={onClose} title="Delete template?" footer={(
       <>
-        <button className="btn" onClick={onClose}>CANCEL</button>
+        <button className="btn" onClick={onClose}>Cancel</button>
         <button className="btn danger" disabled={busy} onClick={handleConfirm}>
           {busy ? 'DELETING...' : 'DELETE TEMPLATE'}
         </button>

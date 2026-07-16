@@ -42,10 +42,10 @@ const Pill = memo(function Pill({ label, on, onClick }) {
     <button
       type="button" onClick={onClick}
       style={{
-        padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 600,
-        border: '1px solid ' + (on ? 'var(--primary, #3b82f6)' : 'var(--border)'),
-        background: on ? 'var(--primary, #3b82f6)' : 'var(--bg-base)',
-        color: on ? '#fff' : 'var(--text-secondary)',
+        padding: '6px 12px', borderRadius: 999, fontSize: 12, fontWeight: 700,
+        border: '1px solid ' + (on ? 'var(--board-amber)' : 'var(--border)'),
+        background: on ? 'var(--board-amber)' : 'var(--bg-base)',
+        color: on ? '#241505' : 'var(--text-secondary)',
         transition: 'all .12s',
       }}
     >
@@ -62,17 +62,17 @@ const PillGroup = memo(function PillGroup({ label, status, items, getKey, getLab
         <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-secondary)' }}>
           {label}
           {status === 'loading' && <span style={{ color: 'var(--text-muted)', fontWeight: 400 }}> loading…</span>}
-          {status === 'error' && <span style={{ color: 'var(--accent-red, #b91c1c)', fontWeight: 400 }}> failed to load</span>}
+          {status === 'error' && <span style={{ color: '#ef4444', fontWeight: 400 }}> failed to load</span>}
         </div>
         {items.length > 0 && (
           <div style={{ display: 'flex', gap: 8, fontSize: 11 }}>
             <button type="button" onClick={onAll} disabled={allOn}
-              style={{ background: 'none', border: 'none', padding: 0, color: allOn ? 'var(--text-muted)' : 'var(--primary, #3b82f6)', cursor: allOn ? 'default' : 'pointer', fontWeight: 700 }}>
+              style={{ background: 'none', border: 'none', padding: 0, color: allOn ? 'var(--text-muted)' : 'var(--board-amber)', cursor: allOn ? 'default' : 'pointer', fontWeight: 700 }}>
               ALL
             </button>
             <span style={{ color: 'var(--border)' }}>·</span>
             <button type="button" onClick={onNone} disabled={selected.length === 0}
-              style={{ background: 'none', border: 'none', padding: 0, color: selected.length === 0 ? 'var(--text-muted)' : 'var(--primary, #3b82f6)', cursor: selected.length === 0 ? 'default' : 'pointer', fontWeight: 700 }}>
+              style={{ background: 'none', border: 'none', padding: 0, color: selected.length === 0 ? 'var(--text-muted)' : 'var(--board-amber)', cursor: selected.length === 0 ? 'default' : 'pointer', fontWeight: 700 }}>
               NONE
             </button>
           </div>
@@ -214,14 +214,15 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
   return (
     <Modal show={show} onClose={onClose} title="New event" footer={(
       <>
-        <button className="btn" onClick={onClose}>CANCEL</button>
-        <button className="btn primary" disabled={noRoster} onClick={handleCreate}>CREATE EVENT</button>
+        <button className="btn" onClick={onClose}>Cancel</button>
+        <button className="btn primary" disabled={noRoster} onClick={handleCreate}>Create event</button>
       </>
     )}>
       {noRoster && (
         <div style={{
           marginBottom: 16, padding: '10px 12px', borderRadius: 8,
-          background: 'var(--accent-red-tint, #fdecea)', color: 'var(--accent-red, #b91c1c)', fontSize: 13,
+          border: '1px solid rgba(239,68,68,0.35)',
+          background: 'rgba(239,68,68,0.10)', color: '#ef4444', fontSize: 13,
         }}>
           No students in this profile's roster yet. Import a roster first. An event can't be created until there's someone to check in.
         </div>

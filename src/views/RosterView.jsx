@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // Ported from #view-roster markup + populateRosterDeptSelect/renderRoster in admin.js.
 //
-// PERF: at 8–10k students, filtering/re-rendering the full matched list on
+// PERF: at 8,000-10,000 students, filtering/re-rendering the full matched list on
 // every keystroke is what made typing feel laggy — not the search algorithm
 // itself. Fixes:
 //   1. The text field's value updates instantly (feels responsive), but the
@@ -243,22 +243,22 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
                                     <span className="roster-row-name">{s.lastname}, {s.firstname} {s.middlename ? s.middlename[0] + '.' : ''}</span>
                                     <span className="roster-row-id mono">{s.studentId}</span>
                                   </div>
-                                  <div className="roster-row-actions" style={{ display: 'flex', gap: 6, marginLeft: 'auto' }}>
+                                  <div className="roster-row-actions" style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
                                     <button
                                       type="button"
                                       className="btn"
                                       title="Edit"
                                       onClick={() => onEditStudent(s)}
-                                      style={{ width: 30, height: 30, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                                      style={{ width: 32, height: 32, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >
                                       ✎
                                     </button>
                                     <button
                                       type="button"
-                                      className="btn"
+                                      className="btn danger"
                                       title="Delete"
                                       onClick={() => onDeleteStudent(s)}
-                                      style={{ width: 30, height: 30, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#e74c3c' }}
+                                      style={{ width: 32, height: 32, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
                                     >
                                       🗑
                                     </button>
