@@ -186,7 +186,7 @@ export function MonitorView({
                       style={{ padding: '10px 14px', cursor: 'pointer', fontSize: 13, display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border)' }}
                       onClick={() => { setManualId(s.studentId); setSearchOpen(false); }}
                     >
-                      <span>{s.lastname}, {s.firstname}</span>
+                      <span>{s.lastname}, {s.firstname}{s.suffix ? ' ' + s.suffix : ''}</span>
                       <span className="mono" style={{ color: 'var(--text-secondary)' }}>{s.studentId}</span>
                     </div>
                   ))}
@@ -250,7 +250,7 @@ export function MonitorView({
                     let badge, label;
                     if (f.outcome === 'ACCEPTED') {
                       badge = f.station === 'LOGIN' ? 'b-green' : 'b-grey';
-                      label = (f.firstname || f.lastname) ? `${f.firstname || ''} ${f.lastname || ''}`.trim() : f.studentId;
+                      label = (f.firstname || f.lastname) ? `${f.firstname || ''} ${f.lastname || ''}${f.suffix ? ' ' + f.suffix : ''}`.trim() : f.studentId;
                     } else if (f.outcome === 'NEEDS_MANUAL_ENTRY') {
  badge = 'b-amber'; label = 'Unknown ID - ' + f.studentId;
                     } else {
@@ -282,7 +282,7 @@ export function MonitorView({
                   inside.map((r) => (
                     <div className="inside-row" key={r.studentId}>
                       <div>
-                        <div className="irow-name">{r.lastname || ''}, {r.firstname || ''}</div>
+                        <div className="irow-name">{r.lastname || ''}, {r.firstname || ''}{r.suffix ? ' ' + r.suffix : ''}</div>
                         <div className="irow-id mono">{r.studentId}</div>
                       </div>
                       {r.isLate ? <span className="badge b-amber">Late</span> : <span className="badge b-green">In</span>}

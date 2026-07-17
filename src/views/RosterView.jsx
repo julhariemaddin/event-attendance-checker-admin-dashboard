@@ -17,7 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 //      so an individual very-large expanded program doesn't hang the tab.
 const SEARCH_DEBOUNCE_MS = 180;
 
-export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, onDeleteStudent }) {
+export function RosterView({ roster, downloadRosterExport, onNewStudent, onEditStudent, onDeleteStudent }) {
   const depts = roster.departments || [];
   const [deptIdx, setDeptIdx] = useState(0);
   const [programIdx, setProgramIdx] = useState(-1);
@@ -150,7 +150,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
               <button className="roster-search-clear" onClick={() => setSearchInput('')} aria-label="Clear search">✕</button>
             )}
           </div>
-          <a className="btn" href={onExportUrl} download>⇩ EXPORT CSV</a>
+          <button className="btn" onClick={downloadRosterExport} download>⇩ EXPORT CSV</button>
           <button
             className="btn primary"
             disabled={totalStudents === 0}
@@ -198,7 +198,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
       {totalStudents === 0 ? (
         <div className="empty-state">
           <div className="et">Roster is empty</div>
-          <div className="ed">Add people manually, or import a roster file from the Import tab.</div>
+          <div className="ed">Import a roster file first from the Import tab.</div>
         </div>
       ) : renderedPrograms.length === 0 ? (
         <div className="empty-state">
@@ -240,7 +240,7 @@ export function RosterView({ roster, onExportUrl, onNewStudent, onEditStudent, o
                                 <div className="roster-row" key={s.studentId} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                                   <span className="roster-avatar">{initials(s)}</span>
                                   <div className="roster-row-info">
-                                    <span className="roster-row-name">{s.lastname}, {s.firstname} {s.middlename ? s.middlename[0] + '.' : ''}</span>
+                                    <span className="roster-row-name">{s.lastname}, {s.firstname} {s.middlename ? s.middlename[0] + '.' : ''}{s.suffix ? ' ' + s.suffix : ''}</span>
                                     <span className="roster-row-id mono">{s.studentId}</span>
                                   </div>
                                   <div className="roster-row-actions" style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>

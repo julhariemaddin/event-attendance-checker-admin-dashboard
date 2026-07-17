@@ -13,7 +13,7 @@ export function ScannerView({ onOpenDocs }) {
       <div className="view-header">
         <div>
           <div className="view-title">Scanner Configuration</div>
-          <div className="view-desc">Configure a scanner to read barcodes and QR codes into the live monitor — wireless and wired.</div>
+          <div className="view-desc">Configure a scanner to read barcodes and QR codes into the live monitor wireless and wired.</div>
         </div>
       </div>
 

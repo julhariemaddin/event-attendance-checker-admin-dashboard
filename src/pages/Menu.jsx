@@ -4,15 +4,11 @@ import { useTheme } from '../hooks/useTheme.js';
 import { ThemeToggle } from '../components/ThemeToggle.jsx';
 import { API_BASE } from '../api/client.js';
 
-// Scanner URL is always port 8080 (Spring Boot), not 5173 (Vite dev).
-// Subject format from licence: "JULHARIE MADDIN - GOV" — shown as welcome.
-// Author info moved to the Creator nav tab (not the sidebar).
-
 const NAV = [
-  { id: 'dashboard', label: 'Dashboard', icon: '◧' },
-  { id: 'about',     label: 'About',     icon: '◇' },
-  { id: 'creator',   label: 'Creator',   icon: '◈' },
-  { id: 'settings',  label: 'Settings',  icon: '◎' },
+  { id: 'dashboard', label: 'Dashboard', icon: '◱' }, // home/dashboard
+  { id: 'about',     label: 'About',     icon: 'ℹ︎' }, // info
+  { id: 'creator',   label: 'Creator',   icon: '✎' }, // creator/edit
+  { id: 'settings',  label: 'Settings',  icon: '⚙︎' },
 ];
 
 export default function Menu({ onOpenAdmin, onLogout }) {
@@ -20,9 +16,9 @@ export default function Menu({ onOpenAdmin, onLogout }) {
   const [navOpen,     setNavOpen]     = useState(false);
   const [panel,       setPanel]       = useState('dashboard');
   const [server,      setServer]      = useState(null);
- const [workspace, setWorkspace] = useState('-');
+  const [workspace,   setWorkspace]   = useState('-');
   const [copied,      setCopied]      = useState(false);
-  const [licenceInfo, setLicenceInfo] = useState(null); // { subject, username, expiration }
+  const [licenceInfo, setLicenceInfo] = useState(null);
 
   const scannerUrl = `http://${window.location.hostname}:8080/scanner.html`;
 
@@ -33,7 +29,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     })
       .then(r => r.json())
- .then(d => { setServer(true); setWorkspace(d.rootPath || '-'); })
+      .then(d => { setServer(true); setWorkspace(d.rootPath || '-'); })
       .catch(() => setServer(false));
 
     try {
@@ -55,10 +51,9 @@ export default function Menu({ onOpenAdmin, onLogout }) {
     setTimeout(() => setCopied(false), 1800);
   }
 
-  // Parse "JULHARIE MADDIN — GOV" → { name: "Julharie Maddin", tag: "GOV" }
   function parseSubject(subject) {
     if (!subject) return { name: null, tag: null };
-    const parts = subject.split(' — '); // NOTE: em dash is the real delimiter used by the licence-issuing tool — do not change to a plain hyphen
+    const parts = subject.split(' — '); 
     const name = parts[0]
       ? parts[0].trim().toLowerCase().replace(/\b\w/g, c => c.toUpperCase())
       : null;
@@ -70,9 +65,9 @@ export default function Menu({ onOpenAdmin, onLogout }) {
 
   const serverColor = server === null ? 'var(--text-muted)' : server ? 'var(--status-live)' : '#ef4444';
   const serverLabel = server === null ? 'CHECKING…' : server ? 'RUNNING' : 'ERROR';
- const workspaceShort = workspace !== '-'
+  const workspaceShort = workspace !== '-'
     ? (workspace.split(/[\\/]/).pop() || workspace)
- : '-';
+    : '-';
 
   const initial = (licenceName || 'A').trim().charAt(0).toUpperCase();
 
@@ -80,13 +75,15 @@ export default function Menu({ onOpenAdmin, onLogout }) {
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--bg-base)' }}>
 
       {/* ── Topbar ─────────────────────────────────────────── */}
-      <div style={{
+      {/* id="topbar" makes admin.css's `:root[data-theme="light"] #topbar` navy
+          override apply here automatically — no manual color duplication needed. */}
+      <div id="topbar" style={{
         height: 56,
         background: 'var(--bg-surface)',
         borderBottom: '1px solid var(--border)',
         display: 'flex', alignItems: 'center',
         padding: '0 20px', gap: 12, flexShrink: 0,
-        backdropFilter: 'blur(8px)',
+        transition: 'background 0.2s, border-color 0.2s',
       }}>
         <button
           className="menu-hamburger-btn"
@@ -109,7 +106,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
           />
           <span style={{
             fontSize: 15, fontWeight: 800, letterSpacing: '.16em',
-            fontFamily: 'var(--mono)',
+            fontFamily: 'var(--mono)', color: 'var(--text-primary)'
           }}>ASEADO</span>
         </div>
 
@@ -118,7 +115,8 @@ export default function Menu({ onOpenAdmin, onLogout }) {
         <div className="menu-status-pill" style={{
           display: 'flex', alignItems: 'center', gap: 7,
           padding: '6px 12px', borderRadius: 20,
-          background: 'var(--bg-subtle)', border: '1px solid var(--border)',
+          background: 'var(--bg-subtle)', 
+          border: '1px solid var(--border)',
         }}>
           <span style={{
             width: 6, height: 6, borderRadius: '50%',
@@ -134,7 +132,9 @@ export default function Menu({ onOpenAdmin, onLogout }) {
           fontSize: 10, fontWeight: 700, letterSpacing: '.08em',
           color: 'var(--text-muted)',
         }}>v1.0</span>
-        <ThemeToggle theme={theme} onToggle={toggleTheme} style={{ width: 32, height: 32, borderRadius: 8 }} />
+
+        <ThemeToggle theme={theme} onToggle={toggleTheme} />
+
         <button onClick={onLogout} style={{
           padding: '7px 14px', fontSize: 10, fontWeight: 800,
           letterSpacing: '.1em',
@@ -149,20 +149,21 @@ export default function Menu({ onOpenAdmin, onLogout }) {
 
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
 
-        {/* Backdrop for the mobile nav drawer */}
         <div
           className={'menu-nav-backdrop' + (navOpen ? ' show' : '')}
           onClick={() => setNavOpen(false)}
         />
 
         {/* ── Left nav ───────────────────────────────────────── */}
-        <div className={'menu-sidenav' + (navOpen ? ' open' : '')} style={{
+        {/* id="sidebar" gets the same admin.css navy override treatment as #topbar. */}
+        <div id="sidebar" className={'menu-sidenav' + (navOpen ? ' open' : '')} style={{
           width: 220, flexShrink: 0,
           background: 'var(--bg-surface)',
           borderRight: '1px solid var(--border)',
           display: 'flex', flexDirection: 'column', overflowY: 'auto',
+          transition: 'background 0.2s, border-color 0.2s',
         }}>
- {/* Welcome block - compact, just avatar + name + tag */}
+          {/* Welcome block */}
           {licenceName && (
             <div style={{
               padding: '20px 18px 16px',
@@ -171,7 +172,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
             }}>
               <div style={{
                 width: 38, height: 38, borderRadius: 10, flexShrink: 0,
-                background: 'linear-gradient(135deg, var(--bg-subtle), var(--border))',
+                background: 'var(--bg-subtle)',
                 border: '1px solid var(--border)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontFamily: 'var(--mono)', fontWeight: 800, fontSize: 15,
@@ -192,7 +193,8 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                     display: 'inline-block', marginTop: 4,
                     padding: '2px 7px', borderRadius: 5,
                     fontSize: 9, fontWeight: 800, letterSpacing: '.1em',
-                    background: 'var(--bg-subtle)', color: 'var(--text-muted)',
+                    background: 'var(--bg-subtle)', 
+                    color: 'var(--text-muted)',
                   }}>{licenceTag}</div>
                 )}
               </div>
@@ -212,19 +214,13 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                   position: 'relative',
                   display: 'flex', alignItems: 'center', gap: 10,
                   width: '100%', padding: '10px 12px', marginBottom: 3,
-                  background: 'transparent', border: 'none', borderRadius: 8,
-                  color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  background: active ? 'var(--bg-subtle)' : 'transparent',
+                  border: 'none', borderRadius: 8,
+                  color: active ? 'var(--text-primary)' : 'var(--text-muted)',
                   fontSize: 12, fontWeight: 700, letterSpacing: '.02em',
                   textAlign: 'left', fontFamily: 'inherit', cursor: 'pointer',
                   overflow: 'hidden',
                 }}>
-                  {active && (
-                    <motion.span
-                      layoutId="menu-nav-active"
-                      transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                      style={{ position: 'absolute', inset: 0, background: 'var(--board-amber-wash)', borderRadius: 8 }}
-                    />
-                  )}
                   {active && (
                     <span style={{ position: 'absolute', left: 0, top: 6, bottom: 6, width: 3, background: 'var(--board-amber)', borderRadius: 2 }} />
                   )}
@@ -255,7 +251,6 @@ export default function Menu({ onOpenAdmin, onLogout }) {
             {/* ── DASHBOARD ──────────────────────────────────── */}
             {panel === 'dashboard' && (
               <motion.div key="dashboard" {...panelMotion}>
-                {/* Welcome banner */}
                 {licenceName && (
                   <div style={{
                     marginBottom: 28, position: 'relative', overflow: 'hidden',
@@ -280,11 +275,11 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                             fontSize: 11, fontWeight: 700,
                             color: 'var(--text-muted)',
                             marginLeft: 12, letterSpacing: '.1em',
- }}> - {licenceTag}</span>
+                          }}> - {licenceTag}</span>
                         )}
                       </div>
                       <div style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 6 }}>
- Fast, Simple &amp; Secure - your event is ready when you are.
+                        Fast, Simple &amp; Secure - your event is ready when you are.
                       </div>
                     </div>
                     <span style={{
@@ -301,7 +296,6 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                   color: 'var(--text-muted)', marginBottom: 12,
                 }}>Quick actions</div>
 
-                {/* Action cards */}
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit,minmax(230px,1fr))',
@@ -328,9 +322,6 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                   />
                 </div>
 
-                {/* System Status — two grouped cards spanning the full width,
-                    same pattern as the Settings panel, instead of one narrow
-                    card with a dead gutter beside it. */}
                 <div style={{
                   fontSize: 9, fontWeight: 800, letterSpacing: '.08em',
                   color: 'var(--text-muted)', marginBottom: 12,
@@ -376,7 +367,6 @@ export default function Menu({ onOpenAdmin, onLogout }) {
               <motion.div key="about" {...panelMotion} style={{ maxWidth: 760, margin: '0 auto' }}>
                 <PanelHeader title="About" desc="Version information and system details." />
 
-                {/* Hero strip — wordmark + tagline, flanked by rule lines like the login/licence screens */}
                 <div style={{
                   display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14,
                   padding: '22px 0 26px',
@@ -391,8 +381,6 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                   <span style={{ height: 1, flex: 1, background: 'var(--border)' }} />
                 </div>
 
-                {/* Flap tiles — the same split-flap readout used for live counts elsewhere,
-                    repurposed here for version/licence facts instead of a plain label list. */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 24 }}>
                   {[
                     ['VERSION', '1.0.0'],
@@ -406,11 +394,10 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                   ))}
                 </div>
 
-                {/* Two-column explainer — the two things people actually ask: what it is, how it runs */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16 }}>
                   {[
-                    ['WHAT IT IS', 'A check-in system for campus events — scan a student ID with your phone, and attendance is recorded instantly. No paper sign-in sheet needed.'],
-                    ['HOW IT RUNS', 'Everything runs locally on this computer. No internet connection is required once installed — phones connect over the same WiFi network to scan, and all data stays on this machine.'],
+                    ['WHAT IT IS', 'A check-in system for campus events, scan a student ID with your phone, and attendance is recorded instantly. No paper sign-in sheet needed.'],
+                    ['HOW IT RUNS', 'Everything runs locally on this computer. No internet connection is required once installed, phones connect over the same WiFi network to scan, and all data stays on this machine.'],
                   ].map(([l, v]) => (
                     <div key={l} className="card">
                       <div style={{ fontSize: 9, fontWeight: 800, letterSpacing: '.08em', color: 'var(--text-muted)', marginBottom: 8 }}>{l}</div>
@@ -465,7 +452,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                     className="btn"
                     style={{ flex: 1, minWidth: 220, textDecoration: 'none', justifyContent: 'space-between' }}
                   >
-                    <span>PORTFOLIO — julhariemaddin.is-a.dev</span>
+                    <span>PORTFOLIO : julhariemaddin.is-a.dev</span>
                     <span>↗</span>
                   </a>
                   <a
@@ -474,7 +461,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                     className="btn"
                     style={{ flex: 1, minWidth: 220, textDecoration: 'none', justifyContent: 'space-between' }}
                   >
-                    <span>ORGANIZATION — Null-Pointer</span>
+                    <span>ORGANIZATION : Null-Pointer</span>
                     <span>↗</span>
                   </a>
                 </div>
@@ -565,7 +552,7 @@ function ActionCard({ title, desc, onClick, accent, icon }) {
         padding: '20px 20px 22px',
         cursor: 'pointer',
         display: 'flex', flexDirection: 'column', gap: 14,
-        boxShadow: '0 1px 2px var(--shadow-color)',
+        boxShadow: 'var(--shadow-elevated, 0 1px 2px var(--shadow-color))',
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -593,7 +580,7 @@ function ActionCard({ title, desc, onClick, accent, icon }) {
 }
 
 function formatExpiry(raw) {
- if (!raw) return '-';
+  if (!raw) return '-';
   try {
     return new Date(raw).toLocaleDateString('en-PH', {
       year: 'numeric', month: 'long', day: 'numeric',

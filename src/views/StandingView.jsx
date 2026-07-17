@@ -196,7 +196,7 @@ export function StandingView({ isV2, toast }) {
             {!isCollapsed && group.students.map((r) => (
               <div key={r.studentId} className="standing-row" style={{ cursor: 'pointer' }} onClick={() => setSelectedStudent(r)}>
                 <span className="standing-row-id">{r.studentId}</span>
-                <span className="standing-row-name">{r.lastname}, {r.firstname}</span>
+                <span className="standing-row-name">{r.lastname}, {r.firstname}{r.suffix ? ' ' + r.suffix : ''}</span>
                 <div className="standing-row-progress">
                   <span className="standing-row-count">
                     {r.eligibleEvents === 0 ? 'no data' : `${r.presentCount}/${r.eligibleEvents}`}

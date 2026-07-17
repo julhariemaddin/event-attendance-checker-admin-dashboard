@@ -12,10 +12,16 @@ import { api } from '../api/client.js';
 // queuePosition/queueTotal show "X of Y pending" so admins know more are
 // waiting; scannedId changing (next item in queue) resets the form even
 // though `show` itself stays true across the transition.
+// EDIT: added an optional Suffix field (Jr., Sr., III, etc.) as a preset
+// dropdown, matching the same treatment used in the roster's Add/Edit
+// person modal, so it stays consistent instead of free-text variants.
+const SUFFIX_OPTIONS = ['Jr.', 'Sr.', 'II', 'III', 'IV', 'V'];
+
 export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, queuePosition, queueTotal, onComplete, toast }) {
   const [lastname, setLastname] = useState('');
   const [firstname, setFirstname] = useState('');
   const [middlename, setMiddlename] = useState('');
+  const [suffix, setSuffix] = useState('');
   const [year, setYear] = useState('');
   const [program, setProgram] = useState('');
   const [departmentId, setDepartmentId] = useState('');
@@ -30,7 +36,7 @@ export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, queu
   // what actually signals "this is a different student now, clear the form."
   useEffect(() => {
     if (show) {
-      setLastname(''); setFirstname(''); setMiddlename('');
+      setLastname(''); setFirstname(''); setMiddlename(''); setSuffix('');
       setYear(''); setProgram(''); setDepartmentId('');
     }
   }, [show, scannedId]);
@@ -77,6 +83,7 @@ export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, queu
       lastname: lastname.trim(),
       firstname: firstname.trim(),
       middlename: middlename.trim() || null,
+      suffix: suffix || null,
       year, program,
       departmentId: isV2 ? (Number(departmentId) || null) : null,
     };
@@ -120,6 +127,13 @@ export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, queu
       </div>
       <div className="field-row">
         <div className="field"><label>Middle name (optional)</label><input type="text" value={middlename} onChange={(e) => setMiddlename(e.target.value)} /></div>
+        <div className="field">
+          <label>Suffix (optional)</label>
+          <select value={suffix} onChange={(e) => setSuffix(e.target.value)}>
+            <option value="">None</option>
+            {SUFFIX_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
         {isV2 && (
           <div className="field">
             <label>Department</label>

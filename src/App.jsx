@@ -135,7 +135,7 @@ export default function App({ onBack, onLogout }) {
     const entry = {
       outcome: data.outcome, studentId: data.studentId,
       station: data.station, reason: data.reason,
-      firstname: data.firstname, lastname: data.lastname,
+      firstname: data.firstname, lastname: data.lastname, suffix: data.suffix,
       time: new Date().toLocaleTimeString(),
     };
     setFeed((prev) => {
@@ -529,10 +529,11 @@ async function handleStopConfirm() {
   // Replaces the old raw export URL / <a href download> approach.
   async function downloadRosterExport() {
     const token = sessionStorage.getItem('aseado_jwt');
-    const url = API_BASE + '/api/roster/export.csv?token=' + token;
+    const url = API_BASE + '/api/roster/export.csv';
     try {
       await downloadFile(url, 'roster-export.csv');
     } catch (err) {
+      
       toast('Export failed: ' + err.message, 'err');
     }
   }
@@ -643,7 +644,7 @@ async function handleStopConfirm() {
         eventId: selectedEventId,
         deviceIds: current?.deviceIds ?? [], // every phone that scanned this ID gets the result
       });
-      toast(`Login completed for ${body.firstname} ${body.lastname}`, 'ok');
+      toast(`Login completed for ${body.firstname} ${body.lastname}${body.suffix ? ' ' + body.suffix : ''}`, 'ok');
       advanceManualQueue();
       loadMonitorForSelectedEvent();
       loadStudents();
@@ -767,7 +768,7 @@ async function handleStopConfirm() {
           {safeView === 'roster' && hasProfile && (
             <RosterView
               roster={roster}
-              onExport={downloadRosterExport}
+              downloadRosterExport={downloadRosterExport}
               onNewStudent={openNewStudent}
               onEditStudent={openEditStudent}
               onDeleteStudent={openDeleteStudentConfirm}
@@ -879,7 +880,7 @@ async function handleStopConfirm() {
       <DeleteStudentConfirmModal
         show={modal === 'deleteStudentConfirm'}
         onClose={() => { setModal(null); setPendingDeleteStudent(null); }}
-        studentName={pendingDeleteStudent ? `${pendingDeleteStudent.lastname}, ${pendingDeleteStudent.firstname}` : ''}
+        studentName={pendingDeleteStudent ? `${pendingDeleteStudent.lastname}, ${pendingDeleteStudent.firstname}${pendingDeleteStudent.suffix ? ' ' + pendingDeleteStudent.suffix : ''}` : ''}
         onConfirm={handleDeleteStudentConfirm}
       />
       <DocsModal show={modal === 'docs'} onClose={() => setModal(null)} />
@@ -918,7 +919,8 @@ function NoProfilePlaceholder({ onNewProfile }) {
       </div>
       <button onClick={onNewProfile} style={{
         padding: '11px 24px',
-        background: 'var(--text-primary)', color: '#000',
+        borderRadius: 4,
+        background: 'var(--text-primary)', color: '#ca8f41',
         border: 'none', fontSize: 11, fontWeight: 800,
         letterSpacing: '.12em', cursor: 'pointer', fontFamily: 'inherit',
       }}>

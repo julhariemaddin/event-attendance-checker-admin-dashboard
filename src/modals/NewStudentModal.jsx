@@ -8,6 +8,12 @@ import { api } from '../api/client.js';
 // EDIT: Year is now a dropdown sourced from /api/roster/year-options, same
 // treatment as Program — never free text, only real values already in the
 // roster. Applies in both V1 and V2; Department dropdown (V2-only) unchanged.
+// EDIT: added an optional Suffix field (Jr., Sr., III, etc.) as a preset
+// dropdown rather than free text, so it stays consistent across the
+// roster instead of "Jr" vs "Jr." vs "JR" showing up inconsistently in
+// reports and exports.
+const SUFFIX_OPTIONS = ['Jr.', 'Sr.', 'II', 'III', 'IV', 'V'];
+
 export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast }) {
   const isEdit = !!editing;
 
@@ -15,6 +21,7 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
   const [lastname, setLastname] = useState('');
   const [firstname, setFirstname] = useState('');
   const [middlename, setMiddlename] = useState('');
+  const [suffix, setSuffix] = useState('');
   const [year, setYear] = useState('');
   const [program, setProgram] = useState('');
   const [deptId, setDeptId] = useState('');
@@ -31,11 +38,13 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
       setLastname(editing.lastname || '');
       setFirstname(editing.firstname || '');
       setMiddlename(editing.middlename || '');
+      setSuffix(editing.suffix || '');
       setYear(editing.year || '');
       setProgram(editing.program || '');
       setDeptId(editing.departmentId != null ? String(editing.departmentId) : '');
     } else {
-      setStudentId(''); setLastname(''); setFirstname(''); setMiddlename(''); setYear(''); setProgram(''); setDeptId('');
+      setStudentId(''); setLastname(''); setFirstname(''); setMiddlename(''); setSuffix('');
+      setYear(''); setProgram(''); setDeptId('');
     }
     setYearOptions(null);
     setProgramOptions(null);
@@ -77,6 +86,7 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
       lastname: lastname.trim(),
       firstname: firstname.trim(),
       middlename: middlename.trim() || null,
+      suffix: suffix || null,
       year,
       program,
       departmentId: null,
@@ -95,7 +105,7 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
     <Modal show={show} onClose={onClose} title={isEdit ? 'Edit person' : 'Add person'} footer={(
       <>
         <button className="btn" onClick={onClose}>Cancel</button>
-        <button className="btn primary" onClick={handleSubmit}>{isEdit ? 'SAVE CHANGES' : 'ADD TO ROSTER'}</button>
+        <button className="btn primary" onClick={handleSubmit}>{isEdit ? 'Save changes' : 'Add to roster'}</button>
       </>
     )}>
       <div className="field">
@@ -108,6 +118,15 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
       </div>
       <div className="field-row">
         <div className="field"><label>Middle name (optional)</label><input type="text" value={middlename} onChange={(e) => setMiddlename(e.target.value)} /></div>
+        <div className="field">
+          <label>Suffix (optional)</label>
+          <select value={suffix} onChange={(e) => setSuffix(e.target.value)}>
+            <option value="">None</option>
+            {SUFFIX_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
+          </select>
+        </div>
+      </div>
+      <div className="field-row">
         <div className="field">
           <label>Year</label>
           <select value={year} onChange={(e) => setYear(e.target.value)}>

@@ -60,7 +60,7 @@ export function StudentStandingModal({ show, student, onClose, onSubmit }) {
         </>
       )}>
         <p style={{ margin: '0 0 16px', fontSize: 13, lineHeight: 1.6 }}>
-          Are you sure you want to mark <strong>{student.lastname}, {student.firstname}</strong> as{' '}
+          Are you sure you want to mark <strong>{student.lastname}, {student.firstname}{student.suffix ? ' ' + student.suffix : ''}</strong> as{' '}
           <strong>{pendingCleared ? 'Cleared' : 'Not Cleared'}</strong>?
         </p>
         <div className="field">
@@ -92,7 +92,7 @@ export function StudentStandingModal({ show, student, onClose, onSubmit }) {
     )}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 20, flexWrap: 'wrap' }}>
         <div>
-          <div style={{ fontSize: 16, fontWeight: 700 }}>{student.lastname}, {student.firstname}</div>
+          <div style={{ fontSize: 16, fontWeight: 700 }}>{student.lastname}, {student.firstname}{student.suffix ? ' ' + student.suffix : ''}</div>
           <div className="mono" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 3 }}>
             {student.studentId} · {student.program} · {student.year}
             {student.departmentCode ? ` · ${student.departmentCode}` : ''}

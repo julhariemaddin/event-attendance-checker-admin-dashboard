@@ -186,6 +186,7 @@ function Root() {
     // inspector out of release builds). This is defense-in-depth on top of
     // that, in case some webview environment still honors these bindings
     // at the OS level regardless of the Rust-side flag.
+    ///Enable this on production
     function onKeyDown(e) {
       if (e.key === 'F11') {
         e.preventDefault();
