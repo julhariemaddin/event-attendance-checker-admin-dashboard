@@ -101,7 +101,7 @@ export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, queu
   return (
     <Modal show={show} onClose={onClose} title="Complete unknown entry" footer={(
       <>
-        <button className="btn" onClick={onClose}>{hasMorePending ? 'SKIP' : 'DISMISS'}</button>
+        <button className="btn" onClick={onClose}>DISMISS</button>
         <button className="btn primary" onClick={handleComplete}>Complete login</button>
       </>
     )}>
@@ -119,7 +119,7 @@ export function ManualEntryModal({ show, onClose, eventId, scannedId, isV2, queu
       </p>
       <p style={{ margin: '0 0 16px', fontSize: 12, color: 'var(--text-muted)' }}>
         Only programs/years/departments allowed by this event's filter are shown below.
- {hasMorePending && ' Skipping moves to the next pending entry - nothing is lost.'}
+ {hasMorePending && ' Dismissing just closes this one - the rest stay in Unknown scans below.'}
       </p>
       <div className="field-row">
         <div className="field"><label>Last name</label><input type="text" value={lastname} onChange={(e) => setLastname(e.target.value)} /></div>

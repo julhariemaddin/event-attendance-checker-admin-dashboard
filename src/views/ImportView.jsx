@@ -49,7 +49,7 @@ export function ImportView({ importStatus, onUpload, onDelete }) {
       <div className="view-header">
         <div>
           <div className="view-title">Import</div>
-          <div className="view-desc">Upload a delimited roster file (CSV/TSV). V2 profiles need a department column; V1 profiles must not include one.</div>
+          <div className="view-desc">Upload a delimited student file (CSV/TSV). V2 profiles need a department column; V1 profiles must not include one.</div>
         </div>
       </div>
 
@@ -62,11 +62,11 @@ export function ImportView({ importStatus, onUpload, onDelete }) {
             </span>
           </div>
           <div style={{ fontSize: 13, color: 'var(--text-secondary)', marginBottom: 24, lineHeight: 1.5 }}>
-            A roster is already loaded for this profile. Delete it first if you need to replace it with a new file.
+            A student list is already loaded for this profile. Delete it first if you need to replace it with a new file.
           </div>
           <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
             <button className="btn danger" disabled={deleting} onClick={handleDelete}>
-              {deleting ? 'DELETING...' : 'DELETE ROSTER'}
+              {deleting ? 'DELETING...' : 'DELETE STUDENTS'}
             </button>
           </div>
         </div>

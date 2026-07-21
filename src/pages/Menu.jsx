@@ -304,7 +304,7 @@ export default function Menu({ onOpenAdmin, onLogout }) {
                   <ActionCard
                     icon="▶"
                     title="ADMIN CONSOLE"
-                    desc="Events, roster, departments, and live scanning."
+                    desc="Events, students, departments, and live scanning."
                     onClick={onOpenAdmin}
                   />
                   <ActionCard

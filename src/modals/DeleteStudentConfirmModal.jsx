@@ -11,7 +11,7 @@ export function DeleteStudentConfirmModal({ show, onClose, studentName, onConfir
     )}>
       <p style={{ fontSize: 13, color: 'var(--text-secondary)', lineHeight: 1.7 }}>
         Are you sure you want to permanently remove <strong style={{ color: 'var(--text-primary)' }}>{studentName}</strong> from
-        the roster? This cannot be undone.
+        the students list? This cannot be undone.
       </p>
     </Modal>
   );

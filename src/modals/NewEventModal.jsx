@@ -163,7 +163,7 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
   async function handleCreate() {
     const trimmedName = name.trim();
     if (!trimmedName || !date) return toast('Name and date are required.', 'err');
-    if (noRoster) return toast('Import a student roster before creating an event.', 'err');
+    if (noRoster) return toast('Import a student list before creating an event.', 'err');
 
     const allYears = Array.isArray(years) ? years : [];
     const allPrograms = Array.isArray(programs) ? programs.map((p) => p.code) : [];
@@ -224,7 +224,7 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
           border: '1px solid rgba(239,68,68,0.35)',
           background: 'rgba(239,68,68,0.10)', color: '#ef4444', fontSize: 13,
         }}>
-          No students in this profile's roster yet. Import a roster first. An event can't be created until there's someone to check in.
+          No students in this profile's list yet. Import students first. An event can't be created until there's someone to check in.
         </div>
       )}
 
@@ -259,7 +259,7 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
           onToggle={toggleYear}
           onAll={allYearsCb}
           onNone={noneYearsCb}
-          emptyHint="No year data yet. Import a roster first."
+          emptyHint="No year data yet. Import students first."
         />
         <div style={{ height: 14 }} />
         <PillGroup
@@ -269,7 +269,7 @@ export function NewEventModal({ show, onClose, isV2, onCreate, toast }) {
           onToggle={toggleProgram}
           onAll={allProgramsCb}
           onNone={noneProgramsCb}
-          emptyHint="No programs yet. Import a roster first."
+          emptyHint="No programs yet. Import students first."
         />
         {isV2 && deptItems.length > 0 && (
           <>

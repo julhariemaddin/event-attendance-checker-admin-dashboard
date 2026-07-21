@@ -99,12 +99,25 @@ export default function App({ onBack, onLogout }) {
   const [pendingDeleteStudent,setPendingDeleteStudent] = useState(null);
   const [editingStudent,      setEditingStudent]       = useState(null); // null = create mode
   const [manualQueue,         setManualQueue]         = useState([]); // pending NEEDS_MANUAL_ENTRY scans, FIFO
+  // Which queue entry the ManualEntryModal is currently showing. The modal
+  // no longer auto-pops on every unknown scan (that was interfering with
+  // whatever the admin was doing) — new unknown scans just land quietly in
+  // the queue/history below, and the admin clicks one to open it.
+  const [manualEntryOpenId,   setManualEntryOpenId]   = useState(null);
   const [reportFiles,         setReportFiles]          = useState([]);
   const [reportEventId,       setReportEventId]        = useState(null);
 
   const activeProfile = profiles.find((p) => p.id === activeProfileId) ?? null;
   const isV2          = !!(activeProfile?.mode === 'V2');
   const hasProfile    = !!activeProfileId;
+
+  // Unknown-scan entries carry the eventId they came from — scoped here to
+  // whichever event Monitor currently has selected, so switching events (or
+  // creating a new one) doesn't leak another event's unresolved unknown
+  // scans into view. The full manualQueue is kept around unscoped since
+  // resolving/dismissing an entry (by queueId) shouldn't depend on which
+  // event happens to be selected at that moment.
+  const eventManualQueue = manualQueue.filter((e) => e.eventId === selectedEventId);
 
   const [stopping, setStopping] = useState(false);
 
@@ -126,6 +139,12 @@ export default function App({ onBack, onLogout }) {
       setEnrolledCount(null);
     }
   }, [events, selectedEventId]);
+
+  useEffect(() => {
+    document.title = eventManualQueue.length > 0
+      ? `(${eventManualQueue.length}) ASEADO - Unknown scans`
+      : 'ASEADO';
+  }, [eventManualQueue.length]);
 
   const selectedEventIdRef = useRef(selectedEventId);
   selectedEventIdRef.current = selectedEventId;
@@ -157,7 +176,7 @@ export default function App({ onBack, onLogout }) {
       // every phone that scanned this ID, not just whichever was first.
       const incomingDeviceId = data.deviceId || null;
       setManualQueue((prev) => {
-        const existingIdx = prev.findIndex((e) => e.studentId === data.studentId);
+        const existingIdx = prev.findIndex((e) => e.studentId === data.studentId && e.eventId === data.eventId);
         if (existingIdx !== -1) {
           const next = [...prev];
           const existing = next[existingIdx];
@@ -170,11 +189,15 @@ export default function App({ onBack, onLogout }) {
         const entry = {
           queueId: (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : Date.now() + '-' + Math.random(),
           studentId: data.studentId,
+          eventId: data.eventId ?? null,
           deviceIds: incomingDeviceId ? [incomingDeviceId] : [],
         };
         return [...prev, entry];
       });
-      setModal('manualEntry'); // no-op if already open on an earlier queued entry
+      // Does NOT auto-open the modal anymore — it used to pop up over
+      // whatever the admin was doing every time an unknown ID scanned in,
+      // which was disruptive. It now just waits in the "Unknown scans"
+      // history list on the Monitor view for the admin to click when ready.
     }
 
     if (selectedEventIdRef.current) {
@@ -498,7 +521,7 @@ async function handleStopConfirm() {
         toast('Student updated', 'ok');
       } else {
         await api('POST', '/api/roster', body);
-        toast('Added to roster', 'ok');
+        toast('Added to students', 'ok');
       }
       setModal(null);
       setEditingStudent(null);
@@ -531,7 +554,7 @@ async function handleStopConfirm() {
     const token = sessionStorage.getItem('aseado_jwt');
     const url = API_BASE + '/api/roster/export.csv';
     try {
-      await downloadFile(url, 'roster-export.csv');
+      await downloadFile(url, 'students-export.csv');
     } catch (err) {
       
       toast('Export failed: ' + err.message, 'err');
@@ -579,7 +602,7 @@ async function handleStopConfirm() {
   async function handleImportDelete() {
     try {
       await api('DELETE', '/api/import');
-      toast('Roster deleted', 'ok');
+      toast('Students deleted', 'ok');
       await loadImportStatus();
       loadStudents();
       loadDepartments();
@@ -637,7 +660,7 @@ async function handleStopConfirm() {
       toast('Select the event this scan belongs to first.', 'err');
       return;
     }
-    const current = manualQueue[0];
+    const current = manualQueue.find((e) => e.queueId === manualEntryOpenId);
     try {
       await api('POST', '/api/scan/manual-entry', {
         ...body,
@@ -645,7 +668,7 @@ async function handleStopConfirm() {
         deviceIds: current?.deviceIds ?? [], // every phone that scanned this ID gets the result
       });
       toast(`Login completed for ${body.firstname} ${body.lastname}${body.suffix ? ' ' + body.suffix : ''}`, 'ok');
-      advanceManualQueue();
+      dismissManualEntry(manualEntryOpenId);
       loadMonitorForSelectedEvent();
       loadStudents();
     } catch (err) {
@@ -653,14 +676,51 @@ async function handleStopConfirm() {
     }
   }
 
-  // Drops the entry currently on screen — either because it was completed,
-  // or the admin chose to skip/dismiss it — and moves to the next queued
-  // entry if one exists, closing the modal only once the queue is empty.
-  function advanceManualQueue() {
+  // Opens the modal on a specific queued/history entry — called when the
+  // admin clicks an item in the "Unknown scans" list on Monitor. Doesn't
+  // touch the rest of the queue, so it's safe to open any entry regardless
+  // of arrival order.
+  function openManualEntry(queueId) {
+    setManualEntryOpenId(queueId);
+    setModal('manualEntry');
+  }
+
+  // Admin-initiated entry for an ID that never actually scanned (e.g. a
+  // card that won't read) — login only, same as scan-triggered unknown
+  // entries. Reuses the same queue/dedupe/modal so it behaves identically
+  // once opened.
+  function addUnknownIdManually(studentId) {
+    const id = studentId.trim();
+    if (!id) return;
+    if (!selectedEventId) {
+      toast('Select an event first.', 'err');
+      return;
+    }
     setManualQueue((prev) => {
-      const next = prev.slice(1);
-      if (next.length === 0) setModal(null);
-      return next;
+      const existing = prev.find((e) => e.studentId === id && e.eventId === selectedEventId);
+      if (existing) {
+        openManualEntry(existing.queueId);
+        return prev;
+      }
+      const entry = {
+        queueId: (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID() : Date.now() + '-' + Math.random(),
+        studentId: id,
+        eventId: selectedEventId,
+        deviceIds: [],
+      };
+      openManualEntry(entry.queueId);
+      return [...prev, entry];
+    });
+  }
+
+  // Drops one entry — either because it was completed, or the admin chose
+  // to skip/dismiss it — without disturbing the rest of the history list.
+  // Only closes the modal if it was open on the entry being dropped.
+  function dismissManualEntry(queueId) {
+    setManualQueue((prev) => prev.filter((e) => e.queueId !== queueId));
+    setManualEntryOpenId((cur) => {
+      if (cur === queueId) { setModal(null); return null; }
+      return cur;
     });
   }
 
@@ -724,6 +784,7 @@ async function handleStopConfirm() {
           onResetProfileClick={() => setModal('resetProfileConfirm')}
           onBack={onBack}
           onClose={() => setSidebarOpen(false)}
+          unknownScanCount={eventManualQueue.length}
         />
 
         <div id="main" onClick={() => { if (window.innerWidth <= 768) setSidebarOpen(false); }}>
@@ -746,6 +807,9 @@ async function handleStopConfirm() {
               onPause={handlePause}
               onResume={handleResume}
               onStopClick={() => setModal('stopConfirm')}
+              manualQueue={eventManualQueue}
+              onOpenUnknownScan={openManualEntry}
+              onAddUnknownId={addUnknownIdManually}
               toast={toast}
             />
           )}
@@ -842,12 +906,12 @@ async function handleStopConfirm() {
   loading={stopping}
 />
       <ManualEntryModal
-        show={modal === 'manualEntry' && manualQueue.length > 0}
-        onClose={advanceManualQueue}
+        show={modal === 'manualEntry' && manualQueue.some((e) => e.queueId === manualEntryOpenId)}
+        onClose={() => dismissManualEntry(manualEntryOpenId)}
         eventId={selectedEventId}
-        scannedId={manualQueue[0]?.studentId ?? ''}
-        queuePosition={1}
-        queueTotal={manualQueue.length}
+        scannedId={manualQueue.find((e) => e.queueId === manualEntryOpenId)?.studentId ?? ''}
+        queuePosition={eventManualQueue.findIndex((e) => e.queueId === manualEntryOpenId) + 1}
+        queueTotal={eventManualQueue.length}
         isV2={isV2}
         onComplete={handleManualEntryComplete}
         toast={toast}

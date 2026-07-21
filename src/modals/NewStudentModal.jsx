@@ -105,7 +105,7 @@ export function NewStudentModal({ show, onClose, isV2, editing, onCreate, toast 
     <Modal show={show} onClose={onClose} title={isEdit ? 'Edit person' : 'Add person'} footer={(
       <>
         <button className="btn" onClick={onClose}>Cancel</button>
-        <button className="btn primary" onClick={handleSubmit}>{isEdit ? 'Save changes' : 'Add to roster'}</button>
+        <button className="btn primary" onClick={handleSubmit}>{isEdit ? 'Save changes' : 'Add student'}</button>
       </>
     )}>
       <div className="field">

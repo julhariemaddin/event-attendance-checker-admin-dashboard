@@ -135,7 +135,7 @@ export function RosterView({ roster, downloadRosterExport, onNewStudent, onEditS
     <div className="view active" id="view-roster">
       <div className="view-header">
         <div>
-          <div className="view-title">Roster</div>
+          <div className="view-title">Students</div>
           <div className="view-desc">Everyone registered in the active profile, manually entered or imported from a file.</div>
         </div>
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
@@ -154,7 +154,7 @@ export function RosterView({ roster, downloadRosterExport, onNewStudent, onEditS
           <button
             className="btn primary"
             disabled={totalStudents === 0}
-            title={totalStudents === 0 ? 'Import a roster first' : undefined}
+            title={totalStudents === 0 ? 'Import students first' : undefined}
             style={totalStudents === 0 ? { opacity: 0.4, cursor: 'not-allowed' } : undefined}
             onClick={onNewStudent}
           >
@@ -197,8 +197,8 @@ export function RosterView({ roster, downloadRosterExport, onNewStudent, onEditS
 
       {totalStudents === 0 ? (
         <div className="empty-state">
-          <div className="et">Roster is empty</div>
-          <div className="ed">Import a roster file first from the Import tab.</div>
+          <div className="et">No students yet</div>
+          <div className="ed">Import a student file first from the Import tab.</div>
         </div>
       ) : renderedPrograms.length === 0 ? (
         <div className="empty-state">

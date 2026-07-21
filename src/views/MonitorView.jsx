@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from '../api/client.js';
+import { Modal } from '../components/Modal.jsx';
 
 // Ported from #view-monitor markup + renderMonitor/renderFeed/scheduleCutoffBanner
 // logic in admin.js. Behavior preserved exactly, including the late-cutoff
@@ -27,6 +28,9 @@ export function MonitorView({
   onPause,
   onResume,
   onStopClick,
+  manualQueue,
+  onOpenUnknownScan,
+  onAddUnknownId,
   toast,
 }) {
   const [manualId, setManualId] = useState('');
@@ -34,7 +38,17 @@ export function MonitorView({
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [unknownIdInput, setUnknownIdInput] = useState('');
+  const [openTool, setOpenTool] = useState(null); // null | 'manualScan' | 'unknownAdd' | 'unknownHistory'
   const debounceRef = useRef(null);
+
+  function addUnknownId() {
+    const id = unknownIdInput.trim();
+    if (!id) return toast('Enter an ID.', 'err');
+    if (!selectedEventId) return toast('Select an event first.', 'err');
+    onAddUnknownId(id);
+    setUnknownIdInput('');
+  }
 
   const ev = events.find((e) => e.id === selectedEventId) || null;
   const hasEvent = !!selectedEventId;
@@ -73,7 +87,7 @@ export function MonitorView({
   }, [showCutoffBanner, selectedEventId]);
 
   // Scan rate bar
- let ratePct = 0, rateLabel = total + ' scanned', rateHint = 'Enrolled count unavailable - check event filter or roster.', rateColor = 'var(--status-live)';
+ let ratePct = 0, rateLabel = total + ' scanned', rateHint = 'Enrolled count unavailable - check event filter or student list.', rateColor = 'var(--status-live)';
   if (enrolledCount != null && enrolledCount > 0) {
     ratePct = Math.min(100, Math.round((total / enrolledCount) * 100));
     rateLabel = total + ' / ' + enrolledCount;
@@ -143,9 +157,34 @@ export function MonitorView({
       )}
 
       {hasEvent && (
+
+      
         <div id="monitorContent">
-          <div className="card manual-scan-box">
-            <div className="side-label" style={{ marginBottom: 12 }}>Manual scan</div>
+          <div className="card" style={{ padding: '14px 18px', marginBottom: 20, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+            <button className="btn" onClick={() => setOpenTool('manualScan')}>Manual scan</button>
+            <button className="btn" onClick={() => setOpenTool('unknownAdd')}>Add unknown ID</button>
+            <button
+              className="btn"
+              style={{ position: 'relative' }}
+              onClick={() => setOpenTool('unknownHistory')}
+            >
+              Unknown history
+              {manualQueue.length > 0 && (
+                <span
+                  style={{
+                    marginLeft: 8, minWidth: 18, height: 18, padding: '0 5px',
+                    borderRadius: 999, background: 'var(--board-amber)', color: '#fff',
+                    fontSize: 11, fontWeight: 700, display: 'inline-flex',
+                    alignItems: 'center', justifyContent: 'center', lineHeight: 1,
+                  }}
+                >
+                  {manualQueue.length > 99 ? '99+' : manualQueue.length}
+                </span>
+              )}
+            </button>
+          </div>
+
+          <Modal show={openTool === 'manualScan'} onClose={() => { setOpenTool(null); setSearchOpen(false); setSearchQuery(''); setSearchResults(null); }} title="Manual scan">
             {isPaused && (
               <div style={{ marginBottom: 12, fontSize: 12, color: 'var(--board-amber)' }}>
  Event is paused - resume it to accept scans again. Existing records below are still visible.
@@ -193,11 +232,54 @@ export function MonitorView({
                 </div>
               </div>
             )}
-          </div>
+          </Modal>
+
+          <Modal show={openTool === 'unknownAdd'} onClose={() => setOpenTool(null)} title="Add unknown ID">
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
+              For an ID that isn't registered and never actually scanned (e.g. a card that won't read). Login only.
+            </div>
+            <div className="manual-scan-row">
+              <input
+                type="text" className="mono" placeholder="Unknown student ID"
+                value={unknownIdInput}
+                disabled={isPaused}
+                autoFocus
+                onChange={(e) => setUnknownIdInput(e.target.value)}
+                onKeyDown={(e) => { if (e.key === 'Enter' && !isPaused) { addUnknownId(); setOpenTool(null); } }}
+              />
+              <button className="btn primary" disabled={isPaused} onClick={() => { addUnknownId(); setOpenTool(null); }}>Add</button>
+            </div>
+          </Modal>
+
+          <Modal show={openTool === 'unknownHistory'} onClose={() => setOpenTool(null)} title={'Unknown history (' + manualQueue.length + ')'}>
+            <div style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 12 }}>
+              Login only. Click an entry to fill in details and complete the login.
+            </div>
+            {manualQueue.length === 0 ? (
+              <div style={{ padding: 24, textAlign: 'center', color: 'var(--text-muted)', fontSize: 13 }}>No unknown scans pending.</div>
+            ) : (
+              manualQueue.map((q) => (
+                <div
+                  key={q.queueId}
+                  className="search-result-row"
+                  style={{ padding: '10px 14px', cursor: 'pointer', fontSize: 13, display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)' }}
+                  onClick={() => { setOpenTool(null); onOpenUnknownScan(q.queueId); }}
+                >
+                  <span className="mono">{q.studentId}</span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    {q.deviceIds.length > 1 && (
+                      <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>{q.deviceIds.length} scans</span>
+                    )}
+                    <span className="badge b-amber">Resolve</span>
+                  </span>
+                </div>
+              ))
+            )}
+          </Modal>
 
           {showCutoffBanner && (
             <div style={{ display: 'block', background: 'var(--board-amber)', color: '#fff', padding: '10px 18px', fontSize: 12, fontWeight: 700, letterSpacing: '.08em', marginBottom: 16 }}>
- ⏰ LATE CUTOFF PASSED - New logins are now marked LATE
+ LATE CUTOFF PASSED - New logins are now marked LATE
             </div>
           )}
 

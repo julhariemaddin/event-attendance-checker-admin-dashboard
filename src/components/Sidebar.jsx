@@ -17,7 +17,7 @@ const NAV_ITEMS = [
   { view: 'events',      label: 'Events',         icon: CalendarClock, requiresProfile: true  },
   { view: 'history',     label: 'History',        icon: HistoryIcon,  requiresProfile: true  },
   { view: 'standing',    label: 'Standing',       icon: TrendingUp,   requiresProfile: true, beta: true },
-  { view: 'roster',      label: 'Roster',         icon: Users,        requiresProfile: true  },
+  { view: 'roster',      label: 'Students',       icon: Users,        requiresProfile: true  },
   { view: 'import',      label: 'Import',         icon: Upload,       requiresProfile: true  },
   { view: 'departments', label: 'Departments',    icon: Building2,    requiresProfile: false },
   { view: 'scanner',     label: 'Scanner',        icon: QrCode,       requiresProfile: false },
@@ -36,6 +36,7 @@ export function Sidebar({
   onResetProfileClick,
   onBack,
   onClose,
+  unknownScanCount = 0,
 }) {
   const hasProfile = !!activeProfileId;
 
@@ -155,6 +156,19 @@ export function Sidebar({
                   {item.label}
                   {item.beta && <span className="nav-btn-beta">Beta</span>}
                 </span>
+                {item.view === 'monitor' && unknownScanCount > 0 && (
+                  <span
+                    title={unknownScanCount + ' unknown scan' + (unknownScanCount === 1 ? '' : 's') + ' pending'}
+                    style={{
+                      marginLeft: 'auto', minWidth: 18, height: 18, padding: '0 5px',
+                      borderRadius: 999, background: 'var(--board-amber)', color: '#fff',
+                      fontSize: 11, fontWeight: 700, display: 'inline-flex',
+                      alignItems: 'center', justifyContent: 'center', lineHeight: 1,
+                    }}
+                  >
+                    {unknownScanCount > 99 ? '99+' : unknownScanCount}
+                  </span>
+                )}
                 {disabled && (
                   <span className="nav-btn-locked" title="Select a profile first">
                     <Lock size={11} strokeWidth={2.4} />
