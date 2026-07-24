@@ -161,7 +161,7 @@ export function MonitorView({
       
         <div id="monitorContent">
           <div className="card" style={{ padding: '14px 18px', marginBottom: 20, display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-            <button className="btn" onClick={() => setOpenTool('manualScan')}>Manual scan</button>
+            <button className="btn primary" onClick={() => setOpenTool('manualScan')}>Manual scan</button>
             <button className="btn" onClick={() => setOpenTool('unknownAdd')}>Add unknown ID</button>
             <button
               className="btn"

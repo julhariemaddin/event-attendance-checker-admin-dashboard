@@ -22,7 +22,7 @@ export function Topbar({ profileName, serverUp, wsConnected, onMobileMenuClick, 
           <Menu size={15} strokeWidth={2.5} />
           Menu
         </button>
-        <div className="brand">
+        <div className="brand" style={{ cursor: 'default' }}>
           <LogoMark />
           <span className="mark">ASEADO</span>
           <span className="sub">{profileName || 'No profile selected'}</span>

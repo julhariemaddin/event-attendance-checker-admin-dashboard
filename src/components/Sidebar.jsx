@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import {
   Radio, CalendarClock, History as HistoryIcon, Users, Upload,
-  Building2, QrCode, Plus, Trash2, RotateCcw, TrendingUp, Lock,
+  Building2, QrCode, Plus, Trash2, RotateCcw, TrendingUp, Lock, Cloud,
 } from 'lucide-react';
 
 // Sidebar — nav items that require an active profile are disabled + grayed
@@ -19,6 +19,7 @@ const NAV_ITEMS = [
   { view: 'standing',    label: 'Standing',       icon: TrendingUp,   requiresProfile: true, beta: true },
   { view: 'roster',      label: 'Students',       icon: Users,        requiresProfile: true  },
   { view: 'import',      label: 'Import',         icon: Upload,       requiresProfile: true  },
+  { view: 'cloudSync',   label: 'Cloud Sync',     icon: Cloud,        requiresProfile: true, beta: true },
   { view: 'departments', label: 'Departments',    icon: Building2,    requiresProfile: false },
   { view: 'scanner',     label: 'Scanner',        icon: QrCode,       requiresProfile: false },
 ];

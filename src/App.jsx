@@ -14,6 +14,7 @@ import { StandingView }    from './views/StandingView.jsx';
 import { ImportView }      from './views/ImportView.jsx';
 import { DepartmentsView } from './views/DepartmentsView.jsx';
 import { ScannerView }     from './views/ScannerView.jsx';
+import { CloudSyncView }   from './views/CloudSyncView.jsx';
 
 import { NewProfileModal }          from './modals/NewProfileModal.jsx';
 import { NewEventModal }            from './modals/NewEventModal.jsx';
@@ -30,7 +31,7 @@ import { DeleteStudentConfirmModal }from './modals/DeleteStudentConfirmModal.jsx
 import { DocsModal }                from './modals/DocsModal.jsx';
 
 // ─── Profile guard ────────────────────────────────────────────────────────────
-const PROFILE_REQUIRED_VIEWS = new Set(['monitor', 'events', 'roster', 'import']);
+const PROFILE_REQUIRED_VIEWS = new Set(['monitor', 'events', 'roster', 'import', 'cloudSync']);
 
 // ─── File download helper (Tauri-safe) ─────────────────────────────────────────
 // Never navigate the webview to a remote-origin URL via <a href> — Tauri v1
@@ -844,6 +845,9 @@ async function handleStopConfirm() {
               onUpload={handleImportUpload}
               onDelete={handleImportDelete}
             />
+          )}
+          {safeView === 'cloudSync' && hasProfile && (
+            <CloudSyncView toast={toast} />
           )}
           {safeView === 'departments' && (
             <DepartmentsView
